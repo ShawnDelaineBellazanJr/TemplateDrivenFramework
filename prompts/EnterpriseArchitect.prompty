@@ -6,11 +6,11 @@ authors:
 model:
   api: chat
   configuration:
-    type: azure_openai
-    azure_endpoint: ${env:AZURE_OPENAI_ENDPOINT}
-    azure_deployment: gpt-4-turbo
-    api_version: "2024-02-01"
-    temperature: 0.1
+    type: openai
+    endpoint: http://localhost:11434/v1
+    deployment: llama3:latest
+    api_key: ollama-local
+    temperature: 0.2
     max_tokens: 4000
 sample:
   requirements: "Build a microservices-based order management system using .NET Aspire"

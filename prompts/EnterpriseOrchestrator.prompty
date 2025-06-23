@@ -6,10 +6,10 @@ authors:
 model:
   api: chat
   configuration:
-    type: azure_openai
-    azure_endpoint: ${env:AZURE_OPENAI_ENDPOINT}
-    azure_deployment: gpt-4-turbo
-    api_version: "2024-02-01"
+    type: openai
+    endpoint: http://localhost:11434/v1
+    deployment: llama3:latest
+    api_key: ollama-local
     temperature: 0.2
     max_tokens: 4000
     top_p: 0.95
