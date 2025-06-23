@@ -1,0 +1,11 @@
+C:\Users\Tooensure\Desktop\TemplateDrivenFramework\src\StrangeLoopPlatform.Infrastructure\bin\Debug\net9.0\StrangeLoopPlatform.Infrastructure.deps.json
+C:\Users\Tooensure\Desktop\TemplateDrivenFramework\src\StrangeLoopPlatform.Infrastructure\bin\Debug\net9.0\StrangeLoopPlatform.Infrastructure.dll
+C:\Users\Tooensure\Desktop\TemplateDrivenFramework\src\StrangeLoopPlatform.Infrastructure\bin\Debug\net9.0\StrangeLoopPlatform.Infrastructure.pdb
+C:\Users\Tooensure\Desktop\TemplateDrivenFramework\src\StrangeLoopPlatform.Infrastructure\obj\Debug\net9.0\StrangeLoopPlatform.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Tooensure\Desktop\TemplateDrivenFramework\src\StrangeLoopPlatform.Infrastructure\obj\Debug\net9.0\StrangeLoopPlatform.Infrastructure.AssemblyInfoInputs.cache
+C:\Users\Tooensure\Desktop\TemplateDrivenFramework\src\StrangeLoopPlatform.Infrastructure\obj\Debug\net9.0\StrangeLoopPlatform.Infrastructure.AssemblyInfo.cs
+C:\Users\Tooensure\Desktop\TemplateDrivenFramework\src\StrangeLoopPlatform.Infrastructure\obj\Debug\net9.0\StrangeLoopPlatform.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Users\Tooensure\Desktop\TemplateDrivenFramework\src\StrangeLoopPlatform.Infrastructure\obj\Debug\net9.0\StrangeLoopPlatform.Infrastructure.dll
+C:\Users\Tooensure\Desktop\TemplateDrivenFramework\src\StrangeLoopPlatform.Infrastructure\obj\Debug\net9.0\refint\StrangeLoopPlatform.Infrastructure.dll
+C:\Users\Tooensure\Desktop\TemplateDrivenFramework\src\StrangeLoopPlatform.Infrastructure\obj\Debug\net9.0\StrangeLoopPlatform.Infrastructure.pdb
+C:\Users\Tooensure\Desktop\TemplateDrivenFramework\src\StrangeLoopPlatform.Infrastructure\obj\Debug\net9.0\ref\StrangeLoopPlatform.Infrastructure.dll

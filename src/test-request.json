@@ -1,0 +1,11 @@
+{
+  "requirements": "Build a microservice that adds two numbers.",
+  "nonFunctionalRequirements": "Fast response, secure, .NET 9",
+  "constraints": "Use .NET Aspire, local LLM",
+  "complexity": 1,
+  "securityLevel": 1,
+  "maxIterations": 5,
+  "enableDynamicCodeGeneration": true,
+  "enableSemanticMemory": true,
+  "enableDynamicApiGeneration": true
+} 
