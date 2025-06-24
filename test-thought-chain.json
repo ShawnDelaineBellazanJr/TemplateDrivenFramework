@@ -1,0 +1,1 @@
+{"humanThought": "Analyze the current system architecture and identify potential improvements for scalability", "boundaries": {"maxDepth": 5, "maxBreadth": 3, "maxIterations": 3, "allowedTopics": ["architecture", "scalability", "performance"], "forbiddenTopics": ["personal", "confidential"]}}

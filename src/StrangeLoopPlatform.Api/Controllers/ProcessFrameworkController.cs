@@ -1,4 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.Process;
+using StrangeLoopPlatform.Agents.Processes;
 using StrangeLoopPlatform.Core.Interfaces;
 using StrangeLoopPlatform.Core.Models;
 
@@ -15,17 +18,26 @@ public class ProcessFrameworkController : ControllerBase
     private readonly IProcessOrchestrator _processOrchestrator;
     private readonly ISemanticMemoryService _memoryService;
     private readonly IDynamicCodeService _dynamicCodeService;
+    private readonly Kernel _kernel;
+    private readonly IPluginDiscoveryService _pluginDiscoveryService;
+    private readonly IDynamicPluginLoader _pluginLoader;
 
     public ProcessFrameworkController(
         ILogger<ProcessFrameworkController> logger,
         IProcessOrchestrator processOrchestrator,
         ISemanticMemoryService memoryService,
-        IDynamicCodeService dynamicCodeService)
+        IDynamicCodeService dynamicCodeService,
+        Kernel kernel,
+        IPluginDiscoveryService pluginDiscoveryService,
+        IDynamicPluginLoader pluginLoader)
     {
         _logger = logger;
         _processOrchestrator = processOrchestrator;
         _memoryService = memoryService;
         _dynamicCodeService = dynamicCodeService;
+        _kernel = kernel;
+        _pluginDiscoveryService = pluginDiscoveryService;
+        _pluginLoader = pluginLoader;
     }
 
     /// <summary>
@@ -270,6 +282,102 @@ public class ProcessFrameworkController : ControllerBase
             return StatusCode(500, new { error = "Failed to get compilation metrics", message = ex.Message });
         }
     }
+
+    [HttpPost("discover-plugins")]
+    public async Task<IActionResult> DiscoverPlugins([FromBody] PluginDiscoveryRequest request)
+    {
+        try
+        {
+            var process = PluginManagementProcess.CreatePluginDiscoveryProcess();
+            
+            var result = await process.StartAsync(_kernel, new KernelProcessEvent
+            {
+                Id = "DiscoverPlugins",
+                Data = request.PluginDirectory ?? "plugins"
+            });
+
+            return Ok(new { Success = true, ProcessStarted = true });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to start plugin discovery process");
+            return BadRequest(new { Success = false, Error = ex.Message });
+        }
+    }
+
+    [HttpPost("generate-api-plugin")]
+    public async Task<IActionResult> GenerateApiPlugin([FromBody] ApiPluginRequest request)
+    {
+        try
+        {
+            var process = PluginManagementProcess.CreatePluginDiscoveryProcess();
+            
+            var result = await process.StartAsync(_kernel, new KernelProcessEvent
+            {
+                Id = "GenerateApiPlugin",
+                Data = new { ApiUrl = request.ApiUrl, OpenApiSpec = request.OpenApiSpec }
+            });
+
+            return Ok(new { Success = true, ProcessStarted = true });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to start API plugin generation process");
+            return BadRequest(new { Success = false, Error = ex.Message });
+        }
+    }
+
+    [HttpPost("orchestrate-plugins")]
+    public async Task<IActionResult> OrchestratePlugins([FromBody] PluginOrchestrationRequest request)
+    {
+        try
+        {
+            var process = PluginManagementProcess.CreateDynamicPluginOrchestrationProcess();
+            
+            var result = await process.StartAsync(_kernel, new KernelProcessEvent
+            {
+                Id = "StartPluginOrchestration",
+                Data = request
+            });
+
+            return Ok(new { Success = true, ProcessStarted = true });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to start plugin orchestration process");
+            return BadRequest(new { Success = false, Error = ex.Message });
+        }
+    }
+
+    [HttpGet("loaded-plugins")]
+    public async Task<IActionResult> GetLoadedPlugins()
+    {
+        try
+        {
+            var plugins = await _pluginLoader.GetLoadedPluginsAsync(_kernel);
+            return Ok(new { Success = true, Plugins = plugins });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get loaded plugins");
+            return BadRequest(new { Success = false, Error = ex.Message });
+        }
+    }
+
+    [HttpDelete("unload-plugin/{pluginName}")]
+    public async Task<IActionResult> UnloadPlugin(string pluginName)
+    {
+        try
+        {
+            var success = await _pluginLoader.UnloadPluginAsync(_kernel, pluginName);
+            return Ok(new { Success = success });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to unload plugin {PluginName}", pluginName);
+            return BadRequest(new { Success = false, Error = ex.Message });
+        }
+    }
 }
 
 /// <summary>
@@ -283,4 +391,21 @@ public class CodeCompilationRequest
     public string? FunctionName { get; set; }
     public List<object>? Parameters { get; set; }
     public bool ExecuteAfterCompile { get; set; } = false;
+}
+
+public record PluginDiscoveryRequest
+{
+    public string? PluginDirectory { get; init; }
+}
+
+public record ApiPluginRequest
+{
+    public string ApiUrl { get; init; } = string.Empty;
+    public string? OpenApiSpec { get; init; }
+}
+
+public record PluginOrchestrationRequest
+{
+    public string? PluginDirectory { get; init; }
+    public List<string> ApiUrls { get; init; } = new();
 } 
