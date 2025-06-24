@@ -32,13 +32,13 @@ public class ProcessFrameworkController : ControllerBase
     /// Start a new self-improvement process
     /// </summary>
     /// <param name="request">The request to process</param>
-    /// <returns>Process state with initial configuration</returns>
+    /// <returns>Initial process state</returns>
     [HttpPost("start")]
-    public async Task<ActionResult<ProcessState>> StartProcess([FromBody] StrangeLoopRequest request)
+    public async Task<ActionResult<ProcessState>> StartProcess([FromBody] SelfImprovementRequest request)
     {
         try
         {
-            _logger.LogInformation("Starting new process for request: {Requirements}", request.Requirements);
+            _logger.LogInformation("Starting new process for request: {Title}", request.Title);
             
             var processState = await _processOrchestrator.StartProcessAsync(request);
             
@@ -46,7 +46,7 @@ public class ProcessFrameworkController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error starting process for request: {Requirements}", request.Requirements);
+            _logger.LogError(ex, "Error starting process for request: {Title}", request.Title);
             return StatusCode(500, new { error = "Failed to start process", message = ex.Message });
         }
     }
@@ -61,7 +61,7 @@ public class ProcessFrameworkController : ControllerBase
     {
         try
         {
-            var processState = await _processOrchestrator.GetProcessStatusAsync(processId);
+            var processState = await _processOrchestrator.GetProcessStateAsync(processId);
             if (processState == null)
             {
                 return NotFound(new { error = "Process not found", processId });
@@ -70,7 +70,7 @@ public class ProcessFrameworkController : ControllerBase
             _logger.LogInformation("Executing next phase for process {ProcessId}. Current phase: {Phase}", 
                 processId, processState.CurrentPhase);
 
-            var updatedState = await _processOrchestrator.ExecuteNextPhaseAsync(processState);
+            var updatedState = await _processOrchestrator.ExecutePhaseAsync(processId);
             
             return Ok(updatedState);
         }
@@ -87,19 +87,20 @@ public class ProcessFrameworkController : ControllerBase
     /// <param name="request">The request to process</param>
     /// <returns>Final process state with results</returns>
     [HttpPost("execute")]
-    public async Task<ActionResult<ProcessState>> ExecuteCompleteProcess([FromBody] StrangeLoopRequest request)
+    public async Task<ActionResult<ProcessState>> ExecuteCompleteProcess([FromBody] SelfImprovementRequest request)
     {
         try
         {
-            _logger.LogInformation("Executing complete process for request: {Requirements}", request.Requirements);
+            _logger.LogInformation("Executing complete process for request: {Title}", request.Title);
             
-            var processState = await _processOrchestrator.ExecuteCompleteProcessAsync(request);
+            var processState = await _processOrchestrator.StartProcessAsync(request);
+            var finalState = await _processOrchestrator.CompleteProcessAsync(processState.Id);
             
-            return Ok(processState);
+            return Ok(finalState);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error executing complete process for request: {Requirements}", request.Requirements);
+            _logger.LogError(ex, "Error executing complete process for request: {Title}", request.Title);
             return StatusCode(500, new { error = "Failed to execute complete process", message = ex.Message });
         }
     }
@@ -114,7 +115,7 @@ public class ProcessFrameworkController : ControllerBase
     {
         try
         {
-            var processState = await _processOrchestrator.GetProcessStatusAsync(processId);
+            var processState = await _processOrchestrator.GetProcessStateAsync(processId);
             if (processState == null)
             {
                 return NotFound(new { error = "Process not found", processId });
@@ -186,38 +187,23 @@ public class ProcessFrameworkController : ControllerBase
         {
             _logger.LogInformation("Compiling code for function: {FunctionName}", request.FunctionName);
 
-            // Compile the code
-            var compilationResult = await _dynamicCodeService.CompileCodeAsync(
+            // Compile and execute the code
+            var executionResult = await _dynamicCodeService.CompileAndExecuteAsync(
                 request.SourceCode, 
-                request.AssemblyName ?? "DynamicAssembly");
+                request.FunctionName ?? "Main",
+                request.Parameters?.ToArray());
 
-            if (!compilationResult.Success)
+            if (!executionResult.IsSuccess)
             {
                 return BadRequest(new 
                 { 
-                    error = "Compilation failed", 
-                    diagnostics = compilationResult.Diagnostics,
-                    message = compilationResult.ErrorMessage 
+                    error = "Compilation/execution failed", 
+                    diagnostics = executionResult.Diagnostics,
+                    message = executionResult.ErrorMessage 
                 });
             }
 
-            // Execute the code if requested
-            if (request.ExecuteAfterCompile && !string.IsNullOrEmpty(request.FunctionName))
-            {
-                var executionResult = await _dynamicCodeService.ExecuteMethodAsync(
-                    compilationResult.AssemblyPath!,
-                    request.TypeName ?? "Program",
-                    request.FunctionName,
-                    request.Parameters?.ToArray());
-
-                return Ok(new
-                {
-                    compilation = compilationResult,
-                    execution = executionResult
-                });
-            }
-
-            return Ok(new { compilation = compilationResult });
+            return Ok(new { execution = executionResult });
         }
         catch (Exception ex)
         {
@@ -235,7 +221,7 @@ public class ProcessFrameworkController : ControllerBase
     {
         try
         {
-            var metrics = await _memoryService.GetMemoryMetricsAsync();
+            var metrics = await _memoryService.GetMetricsAsync();
             return Ok(metrics);
         }
         catch (Exception ex)
@@ -246,17 +232,17 @@ public class ProcessFrameworkController : ControllerBase
     }
 
     /// <summary>
-    /// Search memory for relevant entries
+    /// Search semantic memory for relevant information
     /// </summary>
     /// <param name="query">Search query</param>
     /// <param name="limit">Maximum number of results</param>
-    /// <returns>Relevant memory entries</returns>
+    /// <returns>List of relevant memory entries</returns>
     [HttpGet("memory/search")]
     public async Task<ActionResult<List<MemoryEntry>>> SearchMemory([FromQuery] string query, [FromQuery] int limit = 10)
     {
         try
         {
-            var results = await _memoryService.RetrieveMemoryAsync(query, limit);
+            var results = await _memoryService.RetrieveAsync(query, limit);
             return Ok(results);
         }
         catch (Exception ex)
@@ -267,15 +253,15 @@ public class ProcessFrameworkController : ControllerBase
     }
 
     /// <summary>
-    /// Get compilation metrics
+    /// Get compilation performance metrics
     /// </summary>
-    /// <returns>Dynamic code service metrics</returns>
+    /// <returns>Compilation metrics and statistics</returns>
     [HttpGet("compile/metrics")]
-    public ActionResult<CompilationMetrics> GetCompilationMetrics()
+    public async Task<ActionResult<PerformanceMetrics>> GetCompilationMetrics()
     {
         try
         {
-            var metrics = _dynamicCodeService.GetCompilationMetrics();
+            var metrics = await _dynamicCodeService.GetPerformanceMetricsAsync();
             return Ok(metrics);
         }
         catch (Exception ex)

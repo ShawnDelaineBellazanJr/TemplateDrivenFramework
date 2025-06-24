@@ -1,10 +1,12 @@
 C:\Users\Tooensure\Desktop\TemplateDrivenFramework\src\StrangeLoopPlatform.Core\bin\Debug\net9.0\StrangeLoopPlatform.Core.deps.json
 C:\Users\Tooensure\Desktop\TemplateDrivenFramework\src\StrangeLoopPlatform.Core\bin\Debug\net9.0\StrangeLoopPlatform.Core.dll
 C:\Users\Tooensure\Desktop\TemplateDrivenFramework\src\StrangeLoopPlatform.Core\bin\Debug\net9.0\StrangeLoopPlatform.Core.pdb
+C:\Users\Tooensure\Desktop\TemplateDrivenFramework\src\StrangeLoopPlatform.Core\obj\Debug\net9.0\StrangeLoopPlatform.Core.csproj.AssemblyReference.cache
 C:\Users\Tooensure\Desktop\TemplateDrivenFramework\src\StrangeLoopPlatform.Core\obj\Debug\net9.0\StrangeLoopPlatform.Core.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\Tooensure\Desktop\TemplateDrivenFramework\src\StrangeLoopPlatform.Core\obj\Debug\net9.0\StrangeLoopPlatform.Core.AssemblyInfoInputs.cache
 C:\Users\Tooensure\Desktop\TemplateDrivenFramework\src\StrangeLoopPlatform.Core\obj\Debug\net9.0\StrangeLoopPlatform.Core.AssemblyInfo.cs
 C:\Users\Tooensure\Desktop\TemplateDrivenFramework\src\StrangeLoopPlatform.Core\obj\Debug\net9.0\StrangeLoopPlatform.Core.csproj.CoreCompileInputs.cache
+C:\Users\Tooensure\Desktop\TemplateDrivenFramework\src\StrangeLoopPlatform.Core\obj\Debug\net9.0\StrangeLoopPlatform.Core.sourcelink.json
 C:\Users\Tooensure\Desktop\TemplateDrivenFramework\src\StrangeLoopPlatform.Core\obj\Debug\net9.0\StrangeLoopPlatform.Core.dll
 C:\Users\Tooensure\Desktop\TemplateDrivenFramework\src\StrangeLoopPlatform.Core\obj\Debug\net9.0\refint\StrangeLoopPlatform.Core.dll
 C:\Users\Tooensure\Desktop\TemplateDrivenFramework\src\StrangeLoopPlatform.Core\obj\Debug\net9.0\StrangeLoopPlatform.Core.pdb

@@ -54,6 +54,7 @@ builder.Services.AddScoped<ISemanticMemoryService, InMemorySemanticMemoryService
 // Register API plugin services
 builder.Services.AddScoped<IApiPluginService, ApiPluginService>();
 builder.Services.AddScoped<IOpenApiPluginService, OpenApiPluginService>();
+builder.Services.AddHttpClient<INSwagCodeGenerationService, NSwagCodeGenerationService>();
 
 // Configure logging
 builder.Services.AddLogging(logging =>

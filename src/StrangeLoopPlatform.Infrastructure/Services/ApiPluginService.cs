@@ -357,4 +357,32 @@ public class ApiPluginService : IApiPluginService
             return JsonSerializer.Serialize(new { error = ex.Message });
         }
     }
+
+    // IApiPluginService required interface stubs
+    public KernelPlugin CreatePluginFromController(Type controllerType)
+    {
+        _logger.LogWarning("CreatePluginFromController is not implemented.");
+        // Stub: Return an empty plugin
+        return KernelPluginFactory.CreateFromFunctions("stub_plugin", new List<KernelFunction>());
+    }
+
+    public IEnumerable<KernelPlugin> GetRegisteredPlugins()
+    {
+        _logger.LogWarning("GetRegisteredPlugins is not implemented. Returning empty list.");
+        // Stub: Return empty list
+        return Enumerable.Empty<KernelPlugin>();
+    }
+
+    public void RegisterPlugin(KernelPlugin plugin)
+    {
+        _logger.LogWarning("RegisterPlugin is not implemented.");
+        // Stub: No-op
+    }
+
+    public bool UnregisterPlugin(string pluginName)
+    {
+        _logger.LogWarning("UnregisterPlugin is not implemented.");
+        // Stub: Always return false
+        return false;
+    }
 } 

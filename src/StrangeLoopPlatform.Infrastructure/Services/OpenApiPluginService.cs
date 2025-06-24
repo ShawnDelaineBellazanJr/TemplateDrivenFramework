@@ -196,4 +196,29 @@ public class OpenApiPluginService : IOpenApiPluginService
             return JsonSerializer.Serialize(new { error = ex.Message });
         }
     }
+
+    // IOpenApiPluginService required interface stubs
+    public async Task<KernelPlugin> LoadOpenApiPluginAsync(string openApiUrl, string? pluginName = null)
+    {
+        _logger.LogWarning("LoadOpenApiPluginAsync is not implemented. Returning empty plugin.");
+        return KernelPluginFactory.CreateFromFunctions(pluginName ?? "stub_openapi_plugin", new List<KernelFunction>());
+    }
+
+    public async Task<KernelPlugin> LoadOpenApiPluginFromFileAsync(string filePath, string? pluginName = null)
+    {
+        _logger.LogWarning("LoadOpenApiPluginFromFileAsync is not implemented. Returning empty plugin.");
+        return KernelPluginFactory.CreateFromFunctions(pluginName ?? "stub_openapi_plugin_file", new List<KernelFunction>());
+    }
+
+    public async Task<KernelPlugin> LoadOpenApiPluginFromContentAsync(string openApiContent, string? pluginName = null)
+    {
+        _logger.LogWarning("LoadOpenApiPluginFromContentAsync is not implemented. Returning empty plugin.");
+        return KernelPluginFactory.CreateFromFunctions(pluginName ?? "stub_openapi_plugin_content", new List<KernelFunction>());
+    }
+
+    public IEnumerable<KernelPlugin> GetLoadedOpenApiPlugins()
+    {
+        _logger.LogWarning("GetLoadedOpenApiPlugins is not implemented. Returning empty list.");
+        return Enumerable.Empty<KernelPlugin>();
+    }
 } 

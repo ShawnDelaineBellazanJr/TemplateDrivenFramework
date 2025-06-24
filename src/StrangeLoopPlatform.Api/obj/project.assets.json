@@ -63,6 +63,24 @@
           }
         }
       },
+      "Fluid.Core/2.24.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.FileProviders.Abstractions": "9.0.0",
+          "Parlot": "1.3.5",
+          "TimeZoneConverter": "7.0.0"
+        },
+        "compile": {
+          "lib/net9.0/Fluid.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/Fluid.dll": {
+            "related": ".pdb;.xml"
+          }
+        }
+      },
       "Microsoft.AspNetCore.OpenApi/9.0.6": {
         "type": "package",
         "dependencies": {
@@ -316,6 +334,25 @@
           "buildTransitive/net8.0/_._": {}
         }
       },
+      "Microsoft.Extensions.Configuration.Abstractions/9.0.5": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.Primitives": "9.0.5"
+        },
+        "compile": {
+          "lib/net9.0/Microsoft.Extensions.Configuration.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/Microsoft.Extensions.Configuration.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net8.0/_._": {}
+        }
+      },
       "Microsoft.Extensions.DependencyInjection/8.0.1": {
         "type": "package",
         "dependencies": {
@@ -344,6 +381,25 @@
         },
         "runtime": {
           "lib/net9.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net8.0/_._": {}
+        }
+      },
+      "Microsoft.Extensions.FileProviders.Abstractions/9.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.Primitives": "9.0.0"
+        },
+        "compile": {
+          "lib/net9.0/Microsoft.Extensions.FileProviders.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/Microsoft.Extensions.FileProviders.Abstractions.dll": {
             "related": ".xml"
           }
         },
@@ -606,6 +662,146 @@
           }
         }
       },
+      "Namotion.Reflection/3.4.2": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/Namotion.Reflection.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Namotion.Reflection.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Newtonsoft.Json/13.0.3": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/Newtonsoft.Json.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/Newtonsoft.Json.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "NJsonSchema/11.3.2": {
+        "type": "package",
+        "dependencies": {
+          "NJsonSchema.Annotations": "11.3.2",
+          "Namotion.Reflection": "3.4.2",
+          "Newtonsoft.Json": "13.0.3"
+        },
+        "compile": {
+          "lib/net8.0/NJsonSchema.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/NJsonSchema.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "NJsonSchema.Annotations/11.3.2": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/NJsonSchema.Annotations.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/NJsonSchema.Annotations.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "NJsonSchema.CodeGeneration/11.3.2": {
+        "type": "package",
+        "dependencies": {
+          "Fluid.Core": "2.24.0",
+          "NJsonSchema": "11.3.2"
+        },
+        "compile": {
+          "lib/net8.0/NJsonSchema.CodeGeneration.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/NJsonSchema.CodeGeneration.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "NJsonSchema.CodeGeneration.CSharp/11.3.2": {
+        "type": "package",
+        "dependencies": {
+          "NJsonSchema.CodeGeneration": "11.3.2"
+        },
+        "compile": {
+          "lib/net8.0/NJsonSchema.CodeGeneration.CSharp.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/NJsonSchema.CodeGeneration.CSharp.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "NSwag.CodeGeneration/14.4.0": {
+        "type": "package",
+        "dependencies": {
+          "NJsonSchema.CodeGeneration": "11.3.2",
+          "NSwag.Core": "14.4.0"
+        },
+        "compile": {
+          "lib/net8.0/NSwag.CodeGeneration.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/NSwag.CodeGeneration.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "NSwag.CodeGeneration.CSharp/14.4.0": {
+        "type": "package",
+        "dependencies": {
+          "NJsonSchema.CodeGeneration.CSharp": "11.3.2",
+          "NSwag.CodeGeneration": "14.4.0"
+        },
+        "compile": {
+          "lib/net8.0/NSwag.CodeGeneration.CSharp.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/NSwag.CodeGeneration.CSharp.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "NSwag.Core/14.4.0": {
+        "type": "package",
+        "dependencies": {
+          "NJsonSchema": "11.3.2"
+        },
+        "compile": {
+          "lib/net8.0/NSwag.Core.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/NSwag.Core.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "OpenAI/2.2.0-beta.4": {
         "type": "package",
         "dependencies": {
@@ -619,6 +815,19 @@
         },
         "runtime": {
           "lib/net8.0/OpenAI.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Parlot/1.3.5": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/Parlot.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Parlot.dll": {
             "related": ".xml"
           }
         }
@@ -919,6 +1128,19 @@
           "lib/netcoreapp2.1/_._": {}
         }
       },
+      "TimeZoneConverter/7.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net9.0/TimeZoneConverter.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/TimeZoneConverter.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "StrangeLoopPlatform.Agents/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v9.0",
@@ -938,11 +1160,38 @@
       "StrangeLoopPlatform.Core/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v9.0",
+        "dependencies": {
+          "Microsoft.SemanticKernel": "1.57.0"
+        },
         "compile": {
           "bin/placeholder/StrangeLoopPlatform.Core.dll": {}
         },
         "runtime": {
           "bin/placeholder/StrangeLoopPlatform.Core.dll": {}
+        }
+      },
+      "StrangeLoopPlatform.Infrastructure/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v9.0",
+        "dependencies": {
+          "Microsoft.CodeAnalysis.CSharp": "4.14.0",
+          "Microsoft.CodeAnalysis.Common": "4.14.0",
+          "Microsoft.Extensions.Configuration.Abstractions": "9.0.5",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.5",
+          "Microsoft.Extensions.Logging.Abstractions": "9.0.5",
+          "Microsoft.SemanticKernel": "1.57.0",
+          "Microsoft.SemanticKernel.Agents.Core": "1.57.0",
+          "Microsoft.SemanticKernel.Connectors.OpenAI": "1.57.0",
+          "NSwag.CodeGeneration.CSharp": "14.4.0",
+          "NSwag.Core": "14.4.0",
+          "StrangeLoopPlatform.Core": "1.0.0",
+          "System.Text.Json": "9.0.5"
+        },
+        "compile": {
+          "bin/placeholder/StrangeLoopPlatform.Infrastructure.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/StrangeLoopPlatform.Infrastructure.dll": {}
         }
       }
     }
@@ -1004,6 +1253,31 @@
         "lib/net8.0/Azure.Identity.xml",
         "lib/netstandard2.0/Azure.Identity.dll",
         "lib/netstandard2.0/Azure.Identity.xml"
+      ]
+    },
+    "Fluid.Core/2.24.0": {
+      "sha512": "R6O35JPDkqpj3rA7DBoGIzj03xxW5cORRX0kscoA1DnA3F8UnLNbuSVvrPa2CVblh28xMQlgqd0K0aFmwu5TAQ==",
+      "type": "package",
+      "path": "fluid.core/2.24.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "fluid.core.2.24.0.nupkg.sha512",
+        "fluid.core.nuspec",
+        "lib/net6.0/Fluid.dll",
+        "lib/net6.0/Fluid.pdb",
+        "lib/net6.0/Fluid.xml",
+        "lib/net8.0/Fluid.dll",
+        "lib/net8.0/Fluid.pdb",
+        "lib/net8.0/Fluid.xml",
+        "lib/net9.0/Fluid.dll",
+        "lib/net9.0/Fluid.pdb",
+        "lib/net9.0/Fluid.xml",
+        "lib/netstandard2.0/Fluid.dll",
+        "lib/netstandard2.0/Fluid.pdb",
+        "lib/netstandard2.0/Fluid.xml",
+        "logo_64x64.png"
       ]
     },
     "Microsoft.AspNetCore.OpenApi/9.0.6": {
@@ -2048,6 +2322,34 @@
         "useSharedDesignerContext.txt"
       ]
     },
+    "Microsoft.Extensions.Configuration.Abstractions/9.0.5": {
+      "sha512": "ew0G6gIznnyAkbIa67wXspkDFcVektjN3xaDAfBDIPbWph+rbuGaaohFxUSGw28ht7wdcWtTtElKnzfkcDDbOQ==",
+      "type": "package",
+      "path": "microsoft.extensions.configuration.abstractions/9.0.5",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "LICENSE.TXT",
+        "PACKAGE.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/net461/Microsoft.Extensions.Configuration.Abstractions.targets",
+        "buildTransitive/net462/_._",
+        "buildTransitive/net8.0/_._",
+        "buildTransitive/netcoreapp2.0/Microsoft.Extensions.Configuration.Abstractions.targets",
+        "lib/net462/Microsoft.Extensions.Configuration.Abstractions.dll",
+        "lib/net462/Microsoft.Extensions.Configuration.Abstractions.xml",
+        "lib/net8.0/Microsoft.Extensions.Configuration.Abstractions.dll",
+        "lib/net8.0/Microsoft.Extensions.Configuration.Abstractions.xml",
+        "lib/net9.0/Microsoft.Extensions.Configuration.Abstractions.dll",
+        "lib/net9.0/Microsoft.Extensions.Configuration.Abstractions.xml",
+        "lib/netstandard2.0/Microsoft.Extensions.Configuration.Abstractions.dll",
+        "lib/netstandard2.0/Microsoft.Extensions.Configuration.Abstractions.xml",
+        "microsoft.extensions.configuration.abstractions.9.0.5.nupkg.sha512",
+        "microsoft.extensions.configuration.abstractions.nuspec",
+        "useSharedDesignerContext.txt"
+      ]
+    },
     "Microsoft.Extensions.DependencyInjection/8.0.1": {
       "sha512": "BmANAnR5Xd4Oqw7yQ75xOAYODybZQRzdeNucg7kS5wWKd2PNnMdYtJ2Vciy0QLylRmv42DGl5+AFL9izA6F1Rw==",
       "type": "package",
@@ -2107,6 +2409,34 @@
         "lib/netstandard2.1/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
         "microsoft.extensions.dependencyinjection.abstractions.9.0.5.nupkg.sha512",
         "microsoft.extensions.dependencyinjection.abstractions.nuspec",
+        "useSharedDesignerContext.txt"
+      ]
+    },
+    "Microsoft.Extensions.FileProviders.Abstractions/9.0.0": {
+      "sha512": "uK439QzYR0q2emLVtYzwyK3x+T5bTY4yWsd/k/ZUS9LR6Sflp8MIdhGXW8kQCd86dQD4tLqvcbLkku8qHY263Q==",
+      "type": "package",
+      "path": "microsoft.extensions.fileproviders.abstractions/9.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "LICENSE.TXT",
+        "PACKAGE.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/net461/Microsoft.Extensions.FileProviders.Abstractions.targets",
+        "buildTransitive/net462/_._",
+        "buildTransitive/net8.0/_._",
+        "buildTransitive/netcoreapp2.0/Microsoft.Extensions.FileProviders.Abstractions.targets",
+        "lib/net462/Microsoft.Extensions.FileProviders.Abstractions.dll",
+        "lib/net462/Microsoft.Extensions.FileProviders.Abstractions.xml",
+        "lib/net8.0/Microsoft.Extensions.FileProviders.Abstractions.dll",
+        "lib/net8.0/Microsoft.Extensions.FileProviders.Abstractions.xml",
+        "lib/net9.0/Microsoft.Extensions.FileProviders.Abstractions.dll",
+        "lib/net9.0/Microsoft.Extensions.FileProviders.Abstractions.xml",
+        "lib/netstandard2.0/Microsoft.Extensions.FileProviders.Abstractions.dll",
+        "lib/netstandard2.0/Microsoft.Extensions.FileProviders.Abstractions.xml",
+        "microsoft.extensions.fileproviders.abstractions.9.0.0.nupkg.sha512",
+        "microsoft.extensions.fileproviders.abstractions.nuspec",
         "useSharedDesignerContext.txt"
       ]
     },
@@ -2445,6 +2775,178 @@
         "microsoft.semantickernel.core.nuspec"
       ]
     },
+    "Namotion.Reflection/3.4.2": {
+      "sha512": "ZHrvPdAg7zV78iOTiH9ua+34rBfn4iH6Bjfo2bzUHOGD3KkjGUvqxBFy+v9p6qwV+GEeYWl4NOqXH8tVcZOMpw==",
+      "type": "package",
+      "path": "namotion.reflection/3.4.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "lib/net462/Namotion.Reflection.dll",
+        "lib/net462/Namotion.Reflection.xml",
+        "lib/net8.0/Namotion.Reflection.dll",
+        "lib/net8.0/Namotion.Reflection.xml",
+        "lib/netstandard2.0/Namotion.Reflection.dll",
+        "lib/netstandard2.0/Namotion.Reflection.xml",
+        "namotion.reflection.3.4.2.nupkg.sha512",
+        "namotion.reflection.nuspec"
+      ]
+    },
+    "Newtonsoft.Json/13.0.3": {
+      "sha512": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ==",
+      "type": "package",
+      "path": "newtonsoft.json/13.0.3",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.md",
+        "README.md",
+        "lib/net20/Newtonsoft.Json.dll",
+        "lib/net20/Newtonsoft.Json.xml",
+        "lib/net35/Newtonsoft.Json.dll",
+        "lib/net35/Newtonsoft.Json.xml",
+        "lib/net40/Newtonsoft.Json.dll",
+        "lib/net40/Newtonsoft.Json.xml",
+        "lib/net45/Newtonsoft.Json.dll",
+        "lib/net45/Newtonsoft.Json.xml",
+        "lib/net6.0/Newtonsoft.Json.dll",
+        "lib/net6.0/Newtonsoft.Json.xml",
+        "lib/netstandard1.0/Newtonsoft.Json.dll",
+        "lib/netstandard1.0/Newtonsoft.Json.xml",
+        "lib/netstandard1.3/Newtonsoft.Json.dll",
+        "lib/netstandard1.3/Newtonsoft.Json.xml",
+        "lib/netstandard2.0/Newtonsoft.Json.dll",
+        "lib/netstandard2.0/Newtonsoft.Json.xml",
+        "newtonsoft.json.13.0.3.nupkg.sha512",
+        "newtonsoft.json.nuspec",
+        "packageIcon.png"
+      ]
+    },
+    "NJsonSchema/11.3.2": {
+      "sha512": "QXvelMLKz1NsMPc0HndaaxryNIV1V+AFYuZV9w3H6e+03jp3f3n1w8XLcIaA5WA51EHQdZEP4V2Bfgl6kpxDKg==",
+      "type": "package",
+      "path": "njsonschema/11.3.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "NuGetIcon.png",
+        "lib/net462/NJsonSchema.dll",
+        "lib/net462/NJsonSchema.xml",
+        "lib/net8.0/NJsonSchema.dll",
+        "lib/net8.0/NJsonSchema.xml",
+        "lib/netstandard2.0/NJsonSchema.dll",
+        "lib/netstandard2.0/NJsonSchema.xml",
+        "njsonschema.11.3.2.nupkg.sha512",
+        "njsonschema.nuspec"
+      ]
+    },
+    "NJsonSchema.Annotations/11.3.2": {
+      "sha512": "rSwQFKdLlq/lbAJfYqI5KBE46KJCbc99L6G9XM1nVpCOxE0eoaNE8+fkJ7Ws+I5VqP7oEPGKXTR3Q7PmYoeTDA==",
+      "type": "package",
+      "path": "njsonschema.annotations/11.3.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "NuGetIcon.png",
+        "lib/net462/NJsonSchema.Annotations.dll",
+        "lib/net462/NJsonSchema.Annotations.xml",
+        "lib/netstandard2.0/NJsonSchema.Annotations.dll",
+        "lib/netstandard2.0/NJsonSchema.Annotations.xml",
+        "njsonschema.annotations.11.3.2.nupkg.sha512",
+        "njsonschema.annotations.nuspec"
+      ]
+    },
+    "NJsonSchema.CodeGeneration/11.3.2": {
+      "sha512": "iamZLbQFv5r+y5YWiNbHgSZ9WErCh8omfVBBsK9ka8suD/ylnAabYE+rOnXiQxwZqyUnx7u+ADmjccHbHE68zw==",
+      "type": "package",
+      "path": "njsonschema.codegeneration/11.3.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "NuGetIcon.png",
+        "lib/net462/NJsonSchema.CodeGeneration.dll",
+        "lib/net462/NJsonSchema.CodeGeneration.xml",
+        "lib/net8.0/NJsonSchema.CodeGeneration.dll",
+        "lib/net8.0/NJsonSchema.CodeGeneration.xml",
+        "lib/netstandard2.0/NJsonSchema.CodeGeneration.dll",
+        "lib/netstandard2.0/NJsonSchema.CodeGeneration.xml",
+        "njsonschema.codegeneration.11.3.2.nupkg.sha512",
+        "njsonschema.codegeneration.nuspec"
+      ]
+    },
+    "NJsonSchema.CodeGeneration.CSharp/11.3.2": {
+      "sha512": "Afy+JFhlPe5nRmUlsEAT9M5Id9w9w5Cjb+rF5w3FofHjE8nibucZK1h8sVM3KM2Ql13I5wlzYZ1OZ6ze2R2sgA==",
+      "type": "package",
+      "path": "njsonschema.codegeneration.csharp/11.3.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "NuGetIcon.png",
+        "lib/net462/NJsonSchema.CodeGeneration.CSharp.dll",
+        "lib/net462/NJsonSchema.CodeGeneration.CSharp.xml",
+        "lib/net8.0/NJsonSchema.CodeGeneration.CSharp.dll",
+        "lib/net8.0/NJsonSchema.CodeGeneration.CSharp.xml",
+        "lib/netstandard2.0/NJsonSchema.CodeGeneration.CSharp.dll",
+        "lib/netstandard2.0/NJsonSchema.CodeGeneration.CSharp.xml",
+        "njsonschema.codegeneration.csharp.11.3.2.nupkg.sha512",
+        "njsonschema.codegeneration.csharp.nuspec"
+      ]
+    },
+    "NSwag.CodeGeneration/14.4.0": {
+      "sha512": "Pgu9Caz60HWEwNBsWV2hAWRzacliCrW28sXkNk90H0Q3z1prv1JjxUfRX7e4+afkKNrAcWJzeYdOaTwu5r55VQ==",
+      "type": "package",
+      "path": "nswag.codegeneration/14.4.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "NuGetIcon.png",
+        "lib/net462/NSwag.CodeGeneration.dll",
+        "lib/net462/NSwag.CodeGeneration.xml",
+        "lib/net8.0/NSwag.CodeGeneration.dll",
+        "lib/net8.0/NSwag.CodeGeneration.xml",
+        "lib/netstandard2.0/NSwag.CodeGeneration.dll",
+        "lib/netstandard2.0/NSwag.CodeGeneration.xml",
+        "nswag.codegeneration.14.4.0.nupkg.sha512",
+        "nswag.codegeneration.nuspec"
+      ]
+    },
+    "NSwag.CodeGeneration.CSharp/14.4.0": {
+      "sha512": "DMy+rUly1pXnRb2+5UQwp9+vUpeD6YFON9A9x98/cqQDhCw+FAs7z46Q9IC6itHHBkogX3K4QMABdC3dUixFJg==",
+      "type": "package",
+      "path": "nswag.codegeneration.csharp/14.4.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "NuGetIcon.png",
+        "lib/net462/NSwag.CodeGeneration.CSharp.dll",
+        "lib/net462/NSwag.CodeGeneration.CSharp.xml",
+        "lib/net8.0/NSwag.CodeGeneration.CSharp.dll",
+        "lib/net8.0/NSwag.CodeGeneration.CSharp.xml",
+        "lib/netstandard2.0/NSwag.CodeGeneration.CSharp.dll",
+        "lib/netstandard2.0/NSwag.CodeGeneration.CSharp.xml",
+        "nswag.codegeneration.csharp.14.4.0.nupkg.sha512",
+        "nswag.codegeneration.csharp.nuspec"
+      ]
+    },
+    "NSwag.Core/14.4.0": {
+      "sha512": "Zo79LJPCJa2KcD2BblRGTQJp7c2ZduZZg0xeI+D8hmcfgHpuQhOHYdd2WSS+cYfO2sEZVtnsbrYM+SGvKvNMCw==",
+      "type": "package",
+      "path": "nswag.core/14.4.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "NuGetIcon.png",
+        "lib/net462/NSwag.Core.dll",
+        "lib/net462/NSwag.Core.xml",
+        "lib/net8.0/NSwag.Core.dll",
+        "lib/net8.0/NSwag.Core.xml",
+        "lib/netstandard2.0/NSwag.Core.dll",
+        "lib/netstandard2.0/NSwag.Core.xml",
+        "nswag.core.14.4.0.nupkg.sha512",
+        "nswag.core.nuspec"
+      ]
+    },
     "OpenAI/2.2.0-beta.4": {
       "sha512": "JZ4/mlVXLaXDIZuC4Ddu0KCAA23z4Ax1AQTS26mpJRuSShjXik7DU8a3basY3ddD51W04F7jeX5eAXamKA6rHw==",
       "type": "package",
@@ -2463,6 +2965,25 @@
         "lib/netstandard2.0/OpenAI.xml",
         "openai.2.2.0-beta.4.nupkg.sha512",
         "openai.nuspec"
+      ]
+    },
+    "Parlot/1.3.5": {
+      "sha512": "F22bBSTGJgzJBBngX7SmgPzbCjrzwt4sPIOUlQ/K9p3mvau+o0mGnDxYTTik7ODOjXBDalpsZacaa8eSnPoEFw==",
+      "type": "package",
+      "path": "parlot/1.3.5",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net472/Parlot.dll",
+        "lib/net472/Parlot.xml",
+        "lib/net6.0/Parlot.dll",
+        "lib/net6.0/Parlot.xml",
+        "lib/net8.0/Parlot.dll",
+        "lib/net8.0/Parlot.xml",
+        "lib/netstandard2.0/Parlot.dll",
+        "lib/netstandard2.0/Parlot.xml",
+        "parlot.1.3.5.nupkg.sha512",
+        "parlot.nuspec"
       ]
     },
     "Swashbuckle.AspNetCore/9.0.1": {
@@ -3021,6 +3542,28 @@
         "version.txt"
       ]
     },
+    "TimeZoneConverter/7.0.0": {
+      "sha512": "sFbY65N/5GdsHx7nkdHFHUG+5Ar4W0w6Aks7Y2X+Q4NOTw6XyX2Il7jm+4tPkc//4mA3nG0RdxI8gKgoJitdLw==",
+      "type": "package",
+      "path": "timezoneconverter/7.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "lib/net462/TimeZoneConverter.dll",
+        "lib/net462/TimeZoneConverter.xml",
+        "lib/net6.0/TimeZoneConverter.dll",
+        "lib/net6.0/TimeZoneConverter.xml",
+        "lib/net8.0/TimeZoneConverter.dll",
+        "lib/net8.0/TimeZoneConverter.xml",
+        "lib/net9.0/TimeZoneConverter.dll",
+        "lib/net9.0/TimeZoneConverter.xml",
+        "lib/netstandard2.0/TimeZoneConverter.dll",
+        "lib/netstandard2.0/TimeZoneConverter.xml",
+        "timezoneconverter.7.0.0.nupkg.sha512",
+        "timezoneconverter.nuspec"
+      ]
+    },
     "StrangeLoopPlatform.Agents/1.0.0": {
       "type": "project",
       "path": "../StrangeLoopPlatform.Agents/StrangeLoopPlatform.Agents.csproj",
@@ -3030,6 +3573,11 @@
       "type": "project",
       "path": "../StrangeLoopPlatform.Core/StrangeLoopPlatform.Core.csproj",
       "msbuildProject": "../StrangeLoopPlatform.Core/StrangeLoopPlatform.Core.csproj"
+    },
+    "StrangeLoopPlatform.Infrastructure/1.0.0": {
+      "type": "project",
+      "path": "../StrangeLoopPlatform.Infrastructure/StrangeLoopPlatform.Infrastructure.csproj",
+      "msbuildProject": "../StrangeLoopPlatform.Infrastructure/StrangeLoopPlatform.Infrastructure.csproj"
     }
   },
   "projectFileDependencyGroups": {
@@ -3041,6 +3589,7 @@
       "Microsoft.SemanticKernel.Agents.OpenAI >= 1.57.0-preview",
       "StrangeLoopPlatform.Agents >= 1.0.0",
       "StrangeLoopPlatform.Core >= 1.0.0",
+      "StrangeLoopPlatform.Infrastructure >= 1.0.0",
       "Swashbuckle.AspNetCore >= 9.0.1"
     ]
   },
@@ -3082,6 +3631,9 @@
             },
             "C:\\Users\\Tooensure\\Desktop\\TemplateDrivenFramework\\src\\StrangeLoopPlatform.Core\\StrangeLoopPlatform.Core.csproj": {
               "projectPath": "C:\\Users\\Tooensure\\Desktop\\TemplateDrivenFramework\\src\\StrangeLoopPlatform.Core\\StrangeLoopPlatform.Core.csproj"
+            },
+            "C:\\Users\\Tooensure\\Desktop\\TemplateDrivenFramework\\src\\StrangeLoopPlatform.Infrastructure\\StrangeLoopPlatform.Infrastructure.csproj": {
+              "projectPath": "C:\\Users\\Tooensure\\Desktop\\TemplateDrivenFramework\\src\\StrangeLoopPlatform.Infrastructure\\StrangeLoopPlatform.Infrastructure.csproj"
             }
           }
         }

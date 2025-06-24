@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("StrangeLoopPlatform.Agents")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+74ae40aba12f0182dd4baa43d0721abd13de64d5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+00f76fdfa42104b7294b10e7aa857cff53b5a0ec")]
 [assembly: System.Reflection.AssemblyProductAttribute("StrangeLoopPlatform.Agents")]
 [assembly: System.Reflection.AssemblyTitleAttribute("StrangeLoopPlatform.Agents")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

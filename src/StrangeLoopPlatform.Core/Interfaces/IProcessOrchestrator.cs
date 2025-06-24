@@ -3,51 +3,122 @@ using StrangeLoopPlatform.Core.Models;
 namespace StrangeLoopPlatform.Core.Interfaces;
 
 /// <summary>
-/// Orchestrates the self-improvement process workflow using SK Process Framework
+/// Orchestrates the self-improvement workflow using Semantic Kernel Process Framework.
+/// This interface manages the autonomous improvement cycle that enables the system
+/// to evolve and enhance itself through AI-driven code generation and analysis.
+/// 
+/// Key responsibilities:
+/// - Manage the four-phase improvement cycle (Planning, Coding, Testing, Reflecting)
+/// - Coordinate multi-agent collaboration for code generation
+/// - Handle process state management and persistence
+/// - Provide process monitoring and control capabilities
+/// 
+/// This orchestrator is the core component of the self-evolving architecture,
+/// enabling continuous autonomous improvement through structured workflows.
 /// </summary>
 public interface IProcessOrchestrator
 {
     /// <summary>
-    /// Starts a new self-improvement process
+    /// Starts a new self-improvement process with the specified request.
+    /// This method initiates the autonomous improvement cycle by creating
+    /// a new process state and beginning the planning phase.
     /// </summary>
-    /// <param name="request">The initial request to process</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>Process state with initial configuration</returns>
-    Task<ProcessState> StartProcessAsync(StrangeLoopRequest request, CancellationToken cancellationToken = default);
+    /// <param name="request">The improvement request containing goals and context</param>
+    /// <returns>A ProcessState representing the started process</returns>
+    /// <exception cref="ArgumentNullException">Thrown when request is null</exception>
+    /// <exception cref="InvalidOperationException">Thrown when process cannot be started</exception>
+    Task<ProcessState> StartProcessAsync(SelfImprovementRequest request);
 
     /// <summary>
-    /// Executes the next phase of the process
+    /// Executes the next phase of the self-improvement process.
+    /// This method progresses through the workflow phases: Planning → Coding → Testing → Reflecting.
+    /// Each phase involves different agents and activities to achieve the improvement goals.
     /// </summary>
-    /// <param name="processState">Current process state</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>Updated process state</returns>
-    Task<ProcessState> ExecuteNextPhaseAsync(ProcessState processState, CancellationToken cancellationToken = default);
+    /// <param name="processId">The unique identifier of the process to execute</param>
+    /// <returns>Updated ProcessState after phase execution</returns>
+    /// <exception cref="ArgumentException">Thrown when processId is invalid</exception>
+    /// <exception cref="InvalidOperationException">Thrown when process cannot be executed</exception>
+    Task<ProcessState> ExecutePhaseAsync(string processId);
 
     /// <summary>
-    /// Executes a complete self-improvement cycle
+    /// Gets the current state of a specific process.
+    /// This method provides detailed information about the process including
+    /// its current phase, progress, and any generated artifacts.
     /// </summary>
-    /// <param name="request">The request to process</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>Final process state with results</returns>
-    Task<ProcessState> ExecuteCompleteProcessAsync(StrangeLoopRequest request, CancellationToken cancellationToken = default);
+    /// <param name="processId">The unique identifier of the process</param>
+    /// <returns>The current ProcessState, or null if not found</returns>
+    /// <exception cref="ArgumentException">Thrown when processId is invalid</exception>
+    Task<ProcessState?> GetProcessStateAsync(string processId);
 
     /// <summary>
-    /// Gets the current status of a process
+    /// Gets all active processes managed by this orchestrator.
+    /// This method provides visibility into all ongoing self-improvement activities
+    /// and their current status.
     /// </summary>
-    /// <param name="processId">Process identifier</param>
-    /// <returns>Current process state or null if not found</returns>
-    Task<ProcessState?> GetProcessStatusAsync(string processId);
+    /// <returns>An enumerable of all active ProcessState objects</returns>
+    Task<IEnumerable<ProcessState>> GetActiveProcessesAsync();
 
     /// <summary>
-    /// Cancels a running process
+    /// Cancels an active process and cleans up associated resources.
+    /// This method safely terminates a process in progress and ensures
+    /// proper cleanup of any temporary artifacts or resources.
     /// </summary>
-    /// <param name="processId">Process identifier</param>
-    /// <returns>True if process was cancelled successfully</returns>
+    /// <param name="processId">The unique identifier of the process to cancel</param>
+    /// <returns>True if the process was successfully cancelled, false if not found</returns>
+    /// <exception cref="ArgumentException">Thrown when processId is invalid</exception>
     Task<bool> CancelProcessAsync(string processId);
 
     /// <summary>
-    /// Gets all active processes
+    /// Completes the entire self-improvement workflow for a process.
+    /// This method executes all phases of the improvement cycle from start to finish,
+    /// providing a complete autonomous improvement experience.
     /// </summary>
-    /// <returns>List of active process states</returns>
-    Task<IEnumerable<ProcessState>> GetActiveProcessesAsync();
+    /// <param name="processId">The unique identifier of the process to complete</param>
+    /// <returns>The final ProcessState after completion</returns>
+    /// <exception cref="ArgumentException">Thrown when processId is invalid</exception>
+    /// <exception cref="InvalidOperationException">Thrown when process cannot be completed</exception>
+    Task<ProcessState> CompleteProcessAsync(string processId);
+}
+
+/// <summary>
+/// Represents a request to initiate a self-improvement process.
+/// This class contains all the information needed to start an autonomous
+/// improvement cycle, including goals, context, and constraints.
+/// </summary>
+public class SelfImprovementRequest
+{
+    /// <summary>
+    /// A descriptive title for the improvement process
+    /// </summary>
+    public string Title { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Detailed description of what should be improved
+    /// </summary>
+    public string Description { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Specific goals or objectives for the improvement
+    /// </summary>
+    public List<string> Goals { get; set; } = new();
+
+    /// <summary>
+    /// Any constraints or limitations to consider during improvement
+    /// </summary>
+    public List<string> Constraints { get; set; } = new();
+
+    /// <summary>
+    /// Priority level of the improvement (Low, Medium, High, Critical)
+    /// </summary>
+    public string Priority { get; set; } = "Medium";
+
+    /// <summary>
+    /// Maximum time allowed for the improvement process
+    /// </summary>
+    public TimeSpan? TimeLimit { get; set; }
+
+    /// <summary>
+    /// Additional context or requirements for the improvement
+    /// </summary>
+    public Dictionary<string, object> Context { get; set; } = new();
 } 

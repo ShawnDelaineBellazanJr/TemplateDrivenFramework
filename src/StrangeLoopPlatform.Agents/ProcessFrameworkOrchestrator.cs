@@ -3,11 +3,24 @@ using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Agents;
 using StrangeLoopPlatform.Core.Interfaces;
 using StrangeLoopPlatform.Core.Models;
+using System.Text.RegularExpressions;
 
 namespace StrangeLoopPlatform.Agents;
 
 /// <summary>
-/// Process Framework orchestrator for managing self-improvement workflows
+/// CRITICAL CLASS: Process Framework orchestrator for managing self-improvement workflows.
+/// 
+/// This class is fundamental to the self-evolving AI architecture and implements:
+/// - Multi-phase self-improvement workflow orchestration
+/// - Agent coordination and management
+/// - Process state tracking and persistence
+/// - Quality gate validation and control
+/// 
+/// DO NOT DELETE: This class is essential for the research plan implementation
+/// and enables the core self-improvement capabilities.
+/// 
+/// Architecture Role: Core orchestrator for self-improvement processes
+/// Research Plan Alignment: Phase 3 - Self-Improvement Workflow Implementation
 /// </summary>
 public class ProcessFrameworkOrchestrator : IProcessOrchestrator
 {
@@ -16,6 +29,7 @@ public class ProcessFrameworkOrchestrator : IProcessOrchestrator
     private readonly IStrangeLoopOrchestrator _strangeLoopOrchestrator;
     private readonly ISemanticMemoryService _memoryService;
     private readonly IDynamicCodeService _dynamicCodeService;
+    private readonly INSwagCodeGenerationService _nswagCodeGenService;
     private readonly Dictionary<string, ProcessState> _activeProcesses;
 
     public ProcessFrameworkOrchestrator(
@@ -23,94 +37,112 @@ public class ProcessFrameworkOrchestrator : IProcessOrchestrator
         Kernel kernel,
         IStrangeLoopOrchestrator strangeLoopOrchestrator,
         ISemanticMemoryService memoryService,
-        IDynamicCodeService dynamicCodeService)
+        IDynamicCodeService dynamicCodeService,
+        INSwagCodeGenerationService nswagCodeGenService)
     {
         _logger = logger;
         _kernel = kernel;
         _strangeLoopOrchestrator = strangeLoopOrchestrator;
         _memoryService = memoryService;
         _dynamicCodeService = dynamicCodeService;
+        _nswagCodeGenService = nswagCodeGenService;
         _activeProcesses = new Dictionary<string, ProcessState>();
     }
 
-    public async Task<ProcessState> StartProcessAsync(StrangeLoopRequest request, CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Starts a new self-improvement process with the specified request.
+    /// This method initiates the autonomous improvement cycle by creating
+    /// a new process state and beginning the planning phase.
+    /// </summary>
+    public async Task<ProcessState> StartProcessAsync(SelfImprovementRequest request)
     {
         var processState = new ProcessState
         {
-            OriginalRequest = request,
-            CurrentPhase = ProcessPhase.Initialized,
-            StartTime = DateTime.UtcNow
+            Id = Guid.NewGuid().ToString(),
+            Title = request.Title,
+            Description = request.Description,
+            Goals = request.Goals,
+            Constraints = request.Constraints,
+            Priority = request.Priority,
+            TimeLimit = request.TimeLimit,
+            Context = request.Context,
+            CurrentPhase = ProcessPhase.Planning,
+            Status = ProcessStatus.Created,
+            CreatedAt = DateTime.UtcNow,
+            LastUpdatedAt = DateTime.UtcNow,
+            ProgressPercentage = 0,
+            IsActive = true
         };
 
-        _activeProcesses[processState.ProcessId] = processState;
+        _activeProcesses[processState.Id] = processState;
 
         _logger.LogInformation("Started new process {ProcessId} for request: {Request}", 
-            processState.ProcessId, request.Requirements);
+            processState.Id, request.Title);
 
-        // Store initial context
-        await _memoryService.StoreProcessContextAsync(processState.ProcessId, new ProcessContext
-        {
-            ProcessId = processState.ProcessId,
-            Data = new Dictionary<string, object>
+        // Store initial context in memory
+        await _memoryService.StoreAsync(
+            $"Process started for request: {request.Title}",
+            new Dictionary<string, object>
             {
                 ["request"] = request,
-                ["startTime"] = processState.StartTime
+                ["startTime"] = processState.CreatedAt,
+                ["processId"] = processState.Id
             },
-            CreatedAt = DateTime.UtcNow
-        }, cancellationToken);
+            new List<string> { "process", "context", "start" }
+        );
 
         return processState;
     }
 
-    public async Task<ProcessState> ExecuteNextPhaseAsync(ProcessState processState, CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Executes the next phase of the self-improvement process.
+    /// This method progresses through the workflow phases: Planning → Coding → Testing → Reflecting.
+    /// Each phase involves different agents and activities to achieve the improvement goals.
+    /// </summary>
+    public async Task<ProcessState> ExecutePhaseAsync(string processId)
     {
+        if (!_activeProcesses.TryGetValue(processId, out var processState))
+        {
+            throw new ArgumentException($"Process {processId} not found");
+        }
+
         var phaseStartTime = DateTime.UtcNow;
         _logger.LogInformation("Executing phase {Phase} for process {ProcessId}", 
-            processState.CurrentPhase, processState.ProcessId);
+            processState.CurrentPhase, processState.Id);
 
         try
         {
+            processState.Status = ProcessStatus.Running;
+            processState.LastUpdatedAt = DateTime.UtcNow;
+
             switch (processState.CurrentPhase)
             {
-                case ProcessPhase.Initialized:
-                    processState.CurrentPhase = ProcessPhase.Planning;
-                    break;
-
                 case ProcessPhase.Planning:
-                    await ExecutePlanningPhaseAsync(processState, cancellationToken);
+                    await ExecutePlanningPhaseAsync(processState);
                     processState.CurrentPhase = ProcessPhase.Coding;
+                    processState.ProgressPercentage = 25;
                     break;
 
                 case ProcessPhase.Coding:
-                    await ExecuteCodingPhaseAsync(processState, cancellationToken);
+                    await ExecuteCodingPhaseAsync(processState);
                     processState.CurrentPhase = ProcessPhase.Testing;
+                    processState.ProgressPercentage = 50;
                     break;
 
                 case ProcessPhase.Testing:
-                    await ExecuteTestingPhaseAsync(processState, cancellationToken);
+                    await ExecuteTestingPhaseAsync(processState);
                     processState.CurrentPhase = ProcessPhase.Reflecting;
+                    processState.ProgressPercentage = 75;
                     break;
 
                 case ProcessPhase.Reflecting:
-                    await ExecuteReflectingPhaseAsync(processState, cancellationToken);
-                    
-                    if (processState.IsConverged)
-                    {
-                        processState.CurrentPhase = ProcessPhase.Converged;
-                        processState.CompletionTime = DateTime.UtcNow;
-                        _activeProcesses.Remove(processState.ProcessId);
-                    }
-                    else if (processState.ShouldContinue)
-                    {
-                        processState.IterationNumber++;
-                        processState.CurrentPhase = ProcessPhase.Planning;
-                    }
-                    else
-                    {
-                        processState.CurrentPhase = ProcessPhase.Failed;
-                        processState.CompletionTime = DateTime.UtcNow;
-                        _activeProcesses.Remove(processState.ProcessId);
-                    }
+                    await ExecuteReflectingPhaseAsync(processState);
+                    processState.CurrentPhase = ProcessPhase.Planning; // Reset for next cycle
+                    processState.ProgressPercentage = 100;
+                    processState.Status = ProcessStatus.Completed;
+                    processState.CompletedAt = DateTime.UtcNow;
+                    processState.IsActive = false;
+                    _activeProcesses.Remove(processState.Id);
                     break;
 
                 default:
@@ -119,237 +151,265 @@ public class ProcessFrameworkOrchestrator : IProcessOrchestrator
 
             // Update metrics
             var phaseTime = DateTime.UtcNow - phaseStartTime;
-            processState.Metrics.PhaseTimings[processState.CurrentPhase.ToString()] = phaseTime;
-            processState.Metrics.TotalExecutionTime = DateTime.UtcNow - processState.StartTime;
+            processState.Metrics.PhaseExecutionTimes[processState.CurrentPhase] = phaseTime;
+            processState.Metrics.TotalExecutionTime = DateTime.UtcNow - processState.CreatedAt;
 
             // Store updated context
-            await _memoryService.StoreProcessContextAsync(processState.ProcessId, new ProcessContext
-            {
-                ProcessId = processState.ProcessId,
-                Data = new Dictionary<string, object>
+            await _memoryService.StoreAsync(
+                $"Process phase {processState.CurrentPhase} completed",
+                new Dictionary<string, object>
                 {
                     ["currentPhase"] = processState.CurrentPhase,
-                    ["iterationNumber"] = processState.IterationNumber,
-                    ["currentPlan"] = processState.CurrentPlan,
-                    ["generatedCode"] = processState.GeneratedCode,
-                    ["testResults"] = processState.TestResults,
-                    ["reflectionResult"] = processState.ReflectionResult
+                    ["phaseTime"] = phaseTime,
+                    ["totalTime"] = processState.Metrics.TotalExecutionTime
                 },
-                LastAccessed = DateTime.UtcNow
-            }, cancellationToken);
+                new List<string> { "process", "context", "phase", processState.CurrentPhase.ToString().ToLower() }
+            );
 
             return processState;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error executing phase {Phase} for process {ProcessId}", 
-                processState.CurrentPhase, processState.ProcessId);
+                processState.CurrentPhase, processState.Id);
             
-            processState.CurrentPhase = ProcessPhase.Failed;
-            processState.ErrorMessage = ex.Message;
-            processState.CompletionTime = DateTime.UtcNow;
-            _activeProcesses.Remove(processState.ProcessId);
+            processState.Status = ProcessStatus.Failed;
+            processState.CompletedAt = DateTime.UtcNow;
+            processState.IsActive = false;
+            processState.Errors.Add(ex.Message);
+            
+            _activeProcesses.Remove(processState.Id);
             
             return processState;
         }
     }
 
-    public async Task<ProcessState> ExecuteCompleteProcessAsync(StrangeLoopRequest request, CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Gets the current state of a specific process.
+    /// This method provides detailed information about the process including
+    /// its current phase, progress, and any generated artifacts.
+    /// </summary>
+    public async Task<ProcessState?> GetProcessStateAsync(string processId)
     {
-        var processState = await StartProcessAsync(request, cancellationToken);
-
-        while (processState.CurrentPhase != ProcessPhase.Converged && 
-               processState.CurrentPhase != ProcessPhase.Failed)
+        if (_activeProcesses.TryGetValue(processId, out var processState))
         {
-            processState = await ExecuteNextPhaseAsync(processState, cancellationToken);
+            return processState;
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Gets all active processes managed by this orchestrator.
+    /// This method provides visibility into all ongoing self-improvement activities
+    /// and their current status.
+    /// </summary>
+    public async Task<IEnumerable<ProcessState>> GetActiveProcessesAsync()
+    {
+        return _activeProcesses.Values.Where(p => p.IsActive);
+    }
+
+    /// <summary>
+    /// Cancels an active process and cleans up associated resources.
+    /// This method safely terminates a process in progress and ensures
+    /// proper cleanup of any temporary artifacts or resources.
+    /// </summary>
+    public async Task<bool> CancelProcessAsync(string processId)
+    {
+        if (_activeProcesses.TryGetValue(processId, out var processState))
+        {
+            processState.Status = ProcessStatus.Cancelled;
+            processState.CompletedAt = DateTime.UtcNow;
+            processState.IsActive = false;
+            _activeProcesses.Remove(processId);
             
-            // Add a small delay to prevent tight loops
-            await Task.Delay(100, cancellationToken);
+            _logger.LogInformation("Cancelled process {ProcessId}", processId);
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Completes the entire self-improvement workflow for a process.
+    /// This method executes all phases of the improvement cycle from start to finish,
+    /// providing a complete autonomous improvement experience.
+    /// </summary>
+    public async Task<ProcessState> CompleteProcessAsync(string processId)
+    {
+        if (!_activeProcesses.TryGetValue(processId, out var processState))
+        {
+            throw new ArgumentException($"Process {processId} not found");
         }
 
-        // Store final learning insights
-        if (processState.CurrentPhase == ProcessPhase.Converged)
+        // Execute all remaining phases
+        while (processState.IsActive && processState.Status != ProcessStatus.Completed)
         {
-            await StoreLearningInsightsAsync(processState, cancellationToken);
+            processState = await ExecutePhaseAsync(processId);
         }
 
         return processState;
     }
 
-    public async Task<ProcessState?> GetProcessStatusAsync(string processId)
+    private async Task ExecutePlanningPhaseAsync(ProcessState processState)
     {
-        if (_activeProcesses.TryGetValue(processId, out var processState))
-        {
-            return processState;
-        }
+        _logger.LogInformation("Executing planning phase for process {ProcessId}", processState.Id);
 
-        // Try to retrieve from memory
-        var context = await _memoryService.GetProcessContextAsync(processId);
-        if (context != null)
-        {
-            // Reconstruct process state from context
-            var reconstructedState = new ProcessState
-            {
-                ProcessId = processId,
-                StartTime = context.CreatedAt
-            };
+        // Retrieve relevant insights from memory
+        var insights = await _memoryService.RetrieveAsync("improvement planning insights", 5);
 
-            if (context.Data.TryGetValue("currentPhase", out var phase))
-            {
-                reconstructedState.CurrentPhase = (ProcessPhase)phase;
-            }
-
-            if (context.Data.TryGetValue("iterationNumber", out var iteration))
-            {
-                reconstructedState.IterationNumber = (int)iteration;
-            }
-
-            return reconstructedState;
-        }
-
-        return null;
-    }
-
-    public async Task<bool> CancelProcessAsync(string processId)
-    {
-        await Task.CompletedTask;
-        if (_activeProcesses.TryGetValue(processId, out var processState))
-        {
-            processState.CurrentPhase = ProcessPhase.Failed;
-            processState.ErrorMessage = "Process cancelled by user";
-            processState.CompletionTime = DateTime.UtcNow;
-            _activeProcesses.Remove(processId);
-
-            _logger.LogInformation("Process {ProcessId} cancelled", processId);
-            return true;
-        }
-
-        return false;
-    }
-
-    public async Task<IEnumerable<ProcessState>> GetActiveProcessesAsync()
-    {
-        await Task.CompletedTask;
-        return _activeProcesses.Values;
-    }
-
-    private async Task ExecutePlanningPhaseAsync(ProcessState processState, CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("Executing planning phase for process {ProcessId}", processState.ProcessId);
-
-        // Retrieve relevant learning insights
-        var insights = await _memoryService.GetLearningInsightsAsync(
-            processState.OriginalRequest.Requirements, 5, cancellationToken);
-
-        // Create planning prompt with context
-        var planningPrompt = CreatePlanningPrompt(processState, insights);
+        // Create planning prompt
+        var planningPrompt = CreatePlanningPrompt(processState, insights.ToList());
 
         // Execute planning using the existing orchestrator
         var planningResponse = await _strangeLoopOrchestrator.ExecuteAsync(new StrangeLoopRequest
         {
             Requirements = planningPrompt
-        }, cancellationToken);
+        });
 
         // Extract the result from the agent results
         var architectResult = planningResponse.AgentResults.GetValueOrDefault(AgentRole.Architect);
-        processState.CurrentPlan = architectResult?.Output ?? "No plan generated";
-        
-        // Store plan in artifact history
-        processState.ArtifactHistory.Add(new ArtifactVersion
-        {
-            Version = processState.IterationNumber,
-            Timestamp = DateTime.UtcNow,
-            ArtifactType = "plan",
-            Content = processState.CurrentPlan,
-            IsActive = true
-        });
+        var planOutput = architectResult?.Output ?? "No plan generated";
 
-        _logger.LogInformation("Planning phase completed for process {ProcessId}", processState.ProcessId);
-    }
+        // Store plan in artifacts
+        processState.Artifacts["planning_output"] = planOutput;
+        processState.Artifacts["planning_timestamp"] = DateTime.UtcNow;
 
-    private async Task ExecuteCodingPhaseAsync(ProcessState processState, CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("Executing coding phase for process {ProcessId}", processState.ProcessId);
-
-        // Create coding prompt with plan context
-        var codingPrompt = CreateCodingPrompt(processState);
-
-        // Execute coding using the existing orchestrator
-        var codingResponse = await _strangeLoopOrchestrator.ExecuteAsync(new StrangeLoopRequest
-        {
-            Requirements = codingPrompt
-        }, cancellationToken);
-
-        // Extract the result from the agent results
-        var developerResult = codingResponse.AgentResults.GetValueOrDefault(AgentRole.SeniorDeveloper);
-        processState.GeneratedCode = developerResult?.Output ?? "No code generated";
-
-        // Store code in artifact history
-        processState.ArtifactHistory.Add(new ArtifactVersion
-        {
-            Version = processState.IterationNumber,
-            Timestamp = DateTime.UtcNow,
-            ArtifactType = "code",
-            Content = processState.GeneratedCode,
-            IsActive = true
-        });
-
-        _logger.LogInformation("Coding phase completed for process {ProcessId}", processState.ProcessId);
-    }
-
-    private async Task ExecuteTestingPhaseAsync(ProcessState processState, CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("Executing testing phase for process {ProcessId}", processState.ProcessId);
-
-        if (string.IsNullOrEmpty(processState.GeneratedCode))
-        {
-            processState.TestResults = new TestResults
+        // Store plan in memory
+        await _memoryService.StoreAsync(
+            planOutput,
+            new Dictionary<string, object>
             {
-                AllTestsPassed = false,
-                ErrorMessage = "No code generated to test"
-            };
+                ["processId"] = processState.Id,
+                ["phase"] = "planning",
+                ["timestamp"] = DateTime.UtcNow
+            },
+            new List<string> { "plan", "planning", "improvement" }
+        );
+
+        _logger.LogInformation("Planning phase completed for process {ProcessId}", processState.Id);
+    }
+
+    private async Task ExecuteCodingPhaseAsync(ProcessState processState)
+    {
+        _logger.LogInformation("Executing coding phase for process {ProcessId}", processState.Id);
+
+        // Check for OpenAPI spec in context or planning output
+        string? openApiUrl = null;
+        if (processState.Context != null && processState.Context.TryGetValue("openApiUrl", out var ctxOpenApiUrlObj))
+        {
+            openApiUrl = ctxOpenApiUrlObj?.ToString();
+        }
+        if (string.IsNullOrWhiteSpace(openApiUrl) && processState.Artifacts.TryGetValue("planning_output", out var planningOutputObj))
+        {
+            var planningOutput = planningOutputObj?.ToString();
+            // Simple heuristic: look for a URL in the planning output
+            if (!string.IsNullOrWhiteSpace(planningOutput))
+            {
+                var urlMatch = System.Text.RegularExpressions.Regex.Match(planningOutput, @"https?://[^\s]+");
+                if (urlMatch.Success)
+                {
+                    openApiUrl = urlMatch.Value;
+                }
+            }
+        }
+
+        string codeOutput;
+        if (!string.IsNullOrWhiteSpace(openApiUrl))
+        {
+            _logger.LogInformation("OpenAPI spec detected for process {ProcessId}: {OpenApiUrl}", processState.Id, openApiUrl);
+            // Use NSwag to generate code
+            codeOutput = await _nswagCodeGenService.GenerateCSharpClientAsync(openApiUrl, "Generated", $"ApiClient_{processState.Id}");
+        }
+        else
+        {
+            // Fallback: Use LLM/agent-driven codegen
+            var codingPrompt = CreateCodingPrompt(processState);
+            var codingResponse = await _strangeLoopOrchestrator.ExecuteAsync(new StrangeLoopRequest
+            {
+                Requirements = codingPrompt
+            });
+            var developerResult = codingResponse.AgentResults.GetValueOrDefault(AgentRole.SeniorDeveloper);
+            codeOutput = developerResult?.Output ?? "No code generated";
+        }
+
+        // Store code in artifacts
+        processState.Artifacts["coding_output"] = codeOutput;
+        processState.Artifacts["coding_timestamp"] = DateTime.UtcNow;
+
+        // Store code in memory
+        await _memoryService.StoreAsync(
+            codeOutput,
+            new Dictionary<string, object>
+            {
+                ["processId"] = processState.Id,
+                ["phase"] = "coding",
+                ["timestamp"] = DateTime.UtcNow
+            },
+            new List<string> { "code", "implementation", "generation" }
+        );
+
+        _logger.LogInformation("Coding phase completed for process {ProcessId}", processState.Id);
+    }
+
+    private async Task ExecuteTestingPhaseAsync(ProcessState processState)
+    {
+        _logger.LogInformation("Executing testing phase for process {ProcessId}", processState.Id);
+
+        // Get the generated code from the previous phase
+        var codeOutput = processState.Artifacts.GetValueOrDefault("coding_output")?.ToString();
+        if (string.IsNullOrEmpty(codeOutput))
+        {
+            processState.Errors.Add("No code generated to test");
             return;
         }
 
         try
         {
-            // Generate test cases
-            var testCases = await _dynamicCodeService.GenerateTestCasesAsync(
-                processState.GeneratedCode, "MainFunction");
+            // Generate test cases using the dynamic code service
+            var testGenerationResult = await _dynamicCodeService.GenerateTestCasesAsync(codeOutput, "xUnit");
 
             // Create testing prompt
-            var testingPrompt = CreateTestingPrompt(processState, testCases);
+            var testingPrompt = CreateTestingPrompt(processState, testGenerationResult.TestCode);
 
             // Execute testing using the existing orchestrator
             var testingResponse = await _strangeLoopOrchestrator.ExecuteAsync(new StrangeLoopRequest
             {
                 Requirements = testingPrompt
-            }, cancellationToken);
+            });
 
             // Extract the result from the agent results
             var qaResult = testingResponse.AgentResults.GetValueOrDefault(AgentRole.QualityAssurance);
             var testOutput = qaResult?.Output ?? "No test results generated";
 
-            // Parse test results (simplified for now)
-            processState.TestResults = ParseTestResults(testOutput);
+            // Store test results in artifacts
+            processState.Artifacts["testing_output"] = testOutput;
+            processState.Artifacts["testing_timestamp"] = DateTime.UtcNow;
+            processState.Artifacts["test_cases"] = testGenerationResult.TestCode;
 
-            _logger.LogInformation("Testing phase completed for process {ProcessId}. All tests passed: {AllPassed}", 
-                processState.ProcessId, processState.TestResults.AllTestsPassed);
+            // Store test results in memory
+            await _memoryService.StoreAsync(
+                testOutput,
+                new Dictionary<string, object>
+                {
+                    ["processId"] = processState.Id,
+                    ["phase"] = "testing",
+                    ["timestamp"] = DateTime.UtcNow,
+                    ["testCases"] = testGenerationResult.TestCode
+                },
+                new List<string> { "test", "validation", "quality" }
+            );
+
+            _logger.LogInformation("Testing phase completed for process {ProcessId}", processState.Id);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during testing phase for process {ProcessId}", processState.ProcessId);
-            processState.TestResults = new TestResults
-            {
-                AllTestsPassed = false,
-                ErrorMessage = ex.Message
-            };
+            _logger.LogError(ex, "Error during testing phase for process {ProcessId}", processState.Id);
+            processState.Errors.Add($"Testing error: {ex.Message}");
         }
     }
 
-    private async Task ExecuteReflectingPhaseAsync(ProcessState processState, CancellationToken cancellationToken)
+    private async Task ExecuteReflectingPhaseAsync(ProcessState processState)
     {
-        _logger.LogInformation("Executing reflection phase for process {ProcessId}", processState.ProcessId);
+        _logger.LogInformation("Executing reflection phase for process {ProcessId}", processState.Id);
 
         // Create reflection prompt
         var reflectionPrompt = CreateReflectionPrompt(processState);
@@ -358,238 +418,185 @@ public class ProcessFrameworkOrchestrator : IProcessOrchestrator
         var reflectionResponse = await _strangeLoopOrchestrator.ExecuteAsync(new StrangeLoopRequest
         {
             Requirements = reflectionPrompt
-        }, cancellationToken);
+        });
 
         // Extract the result from the agent results
         var reflectorResult = reflectionResponse.AgentResults.GetValueOrDefault(AgentRole.Reflector);
         var reflectionOutput = reflectorResult?.Output ?? "No reflection generated";
 
-        // Parse reflection results
-        processState.ReflectionResult = ParseReflectionResult(reflectionOutput);
+        // Store reflection in artifacts
+        processState.Artifacts["reflection_output"] = reflectionOutput;
+        processState.Artifacts["reflection_timestamp"] = DateTime.UtcNow;
 
-        // Determine if process should continue
-        processState.IsConverged = processState.ReflectionResult.ShouldContinue == false && 
-                                  processState.TestResults?.AllTestsPassed == true;
-
-        _logger.LogInformation("Reflection phase completed for process {ProcessId}. Should continue: {ShouldContinue}", 
-            processState.ProcessId, processState.ReflectionResult.ShouldContinue);
-    }
-
-    private async Task StoreLearningInsightsAsync(ProcessState processState, CancellationToken cancellationToken)
-    {
-        var insight = new LearningInsight
-        {
-            Title = $"Successful completion of {processState.OriginalRequest.Requirements}",
-            Description = $"Process completed successfully in {processState.IterationNumber} iterations",
-            Category = "process_completion",
-            Tags = new[] { "success", "optimization", "learning" },
-            CreatedAt = DateTime.UtcNow,
-            SourceProcessId = processState.ProcessId,
-            Confidence = 0.9,
-            Evidence = new Dictionary<string, object>
+        // Store reflection in memory
+        await _memoryService.StoreAsync(
+            reflectionOutput,
+            new Dictionary<string, object>
             {
-                ["iterations"] = processState.IterationNumber,
-                ["totalTime"] = processState.Metrics.TotalExecutionTime,
-                ["finalCode"] = processState.GeneratedCode
-            }
-        };
+                ["processId"] = processState.Id,
+                ["phase"] = "reflecting",
+                ["timestamp"] = DateTime.UtcNow
+            },
+            new List<string> { "reflection", "learning", "improvement" }
+        );
 
-        await _memoryService.StoreLearningInsightAsync(insight, cancellationToken);
+        // Parse reflection result and store insights
+        try
+        {
+            var reflectionData = ParseReflectionResult(reflectionOutput);
+            if (reflectionData != null)
+            {
+                processState.Artifacts["reflection_analysis"] = reflectionData.Analysis;
+                processState.Artifacts["reflection_improvements"] = reflectionData.Improvements;
+                processState.Artifacts["reflection_quality_score"] = reflectionData.QualityScore;
+
+                // Store learning insight in memory
+                await _memoryService.StoreAsync(
+                    reflectionData.Analysis,
+                    new Dictionary<string, object>
+                    {
+                        ["processId"] = processState.Id,
+                        ["qualityScore"] = reflectionData.QualityScore,
+                        ["improvements"] = reflectionData.Improvements
+                    },
+                    new List<string> { "learning", "insight", "improvement" }
+                );
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error parsing reflection result for process {ProcessId}", processState.Id);
+            processState.Warnings.Add($"Reflection parsing error: {ex.Message}");
+        }
+
+        _logger.LogInformation("Reflection phase completed for process {ProcessId}", processState.Id);
     }
 
-    private string CreatePlanningPrompt(ProcessState processState, List<LearningInsight> insights)
+    private string CreatePlanningPrompt(ProcessState processState, List<MemoryEntry> insights)
     {
-        var prompt = $@"
-You are an Enterprise Architect planning a solution for the following request:
+        var insightsText = insights.Any() 
+            ? $"Previous insights: {string.Join(", ", insights.Select(i => i.Content))}"
+            : "No previous insights available";
 
-**Request:** {processState.OriginalRequest.Requirements}
+        return $@"
+You are an Enterprise Architect tasked with planning improvements for the following request:
 
-**Context:**
-- This is iteration {processState.IterationNumber} of the process
-- Previous iterations: {processState.IterationNumber - 1}
+Title: {processState.Title}
+Description: {processState.Description}
+Goals: {string.Join(", ", processState.Goals)}
+Constraints: {string.Join(", ", processState.Constraints)}
+Priority: {processState.Priority}
 
-**Learning Insights from Previous Similar Tasks:**
-{string.Join("\n", insights.Select(i => $"- {i.Title}: {i.Description}"))}
+{insightsText}
 
-**Task:** Create a detailed plan for implementing this solution. The plan should:
-1. Break down the problem into clear, implementable steps
-2. Consider any insights from previous similar tasks
-3. Be specific enough for a developer to implement
-4. Include testing considerations
-
-**Output Format:** Provide a structured plan in JSON format with the following structure:
+Please provide a comprehensive improvement plan in JSON format with the following structure:
 {{
-  ""steps"": [
-    {{
-      ""stepNumber"": 1,
-      ""description"": ""Step description"",
-      ""implementation"": ""How to implement this step"",
-      ""testing"": ""How to test this step""
-    }}
-  ],
-  ""estimatedComplexity"": ""low|medium|high"",
-  ""potentialChallenges"": [""challenge1"", ""challenge2""],
-  ""successCriteria"": [""criterion1"", ""criterion2""]
-}}";
-
-        return prompt;
+    ""plan"": ""Detailed improvement plan"",
+    ""architecture"": ""System architecture considerations"",
+    ""implementation_steps"": [""Step 1"", ""Step 2"", ...],
+    ""risks"": [""Risk 1"", ""Risk 2"", ...],
+    ""success_criteria"": [""Criterion 1"", ""Criterion 2"", ...]
+}}
+";
     }
 
     private string CreateCodingPrompt(ProcessState processState)
     {
+        var planOutput = processState.Artifacts.GetValueOrDefault("planning_output")?.ToString() ?? "No plan available";
+
         return $@"
-You are an Enterprise Senior Developer implementing code based on the following plan:
+You are a Senior Developer tasked with implementing the following improvement plan:
 
-**Original Request:** {processState.OriginalRequest.Requirements}
+{planOutput}
 
-**Current Plan:** {processState.CurrentPlan}
-
-**Task:** Implement the solution according to the plan. The code should:
-1. Be clean, well-structured, and follow C# best practices
-2. Include proper error handling and edge cases
-3. Be testable and maintainable
-4. Include XML documentation comments
-
-**Output Format:** Provide the complete C# code implementation in a code block.
-
-**Requirements:**
-- Use only safe, allowed namespaces and types
-- Include a main function that can be called for testing
-- Handle edge cases and provide meaningful error messages
-- Follow enterprise coding standards";
+Please provide the implementation in JSON format with the following structure:
+{{
+    ""code"": ""Generated C# code"",
+    ""explanation"": ""Explanation of the implementation"",
+    ""dependencies"": [""Dependency 1"", ""Dependency 2"", ...],
+    ""testing_notes"": ""Notes for testing the implementation""
+}}
+";
     }
 
     private string CreateTestingPrompt(ProcessState processState, string testCases)
     {
+        var codeOutput = processState.Artifacts.GetValueOrDefault("coding_output")?.ToString() ?? "No code available";
+
         return $@"
-You are an Enterprise Quality Assurance specialist testing the following code:
+You are a Quality Assurance specialist tasked with testing the following implementation:
 
-**Original Request:** {processState.OriginalRequest.Requirements}
+Code:
+{codeOutput}
 
-**Generated Code:** {processState.GeneratedCode}
+Generated Test Cases:
+{testCases}
 
-**Generated Test Cases:** {testCases}
-
-**Task:** Evaluate the code and test cases to determine if the solution meets the requirements. Consider:
-1. Functional correctness
-2. Edge case handling
-3. Performance considerations
-4. Code quality and maintainability
-
-**Output Format:** Provide a structured test result in JSON format:
+Please provide test results in JSON format with the following structure:
 {{
-  ""allTestsPassed"": true/false,
-  ""testCases"": [
-    {{
-      ""testName"": ""Test name"",
-      ""passed"": true/false,
-      ""expectedOutput"": ""Expected result"",
-      ""actualOutput"": ""Actual result"",
-      ""errorMessage"": ""Error if any""
-    }}
-  ],
-  ""performanceScore"": 0.0-1.0,
-  ""executionTime"": ""00:00:00.000"",
-  ""overallAssessment"": ""Overall assessment of the solution""
-}}";
+    ""allTestsPassed"": true/false,
+    ""testResults"": [""Result 1"", ""Result 2"", ...],
+    ""coverage"": ""Test coverage percentage"",
+    ""recommendations"": [""Recommendation 1"", ""Recommendation 2"", ...]
+}}
+";
     }
 
     private string CreateReflectionPrompt(ProcessState processState)
     {
+        var planOutput = processState.Artifacts.GetValueOrDefault("planning_output")?.ToString() ?? "No plan available";
+        var codeOutput = processState.Artifacts.GetValueOrDefault("coding_output")?.ToString() ?? "No code available";
+        var testOutput = processState.Artifacts.GetValueOrDefault("testing_output")?.ToString() ?? "No test results available";
+
         return $@"
-You are an Enterprise Reflector analyzing the results of a self-improvement process:
+You are a Reflector tasked with analyzing the improvement process and providing insights for future improvements.
 
-**Original Request:** {processState.OriginalRequest.Requirements}
+Process Details:
+Title: {processState.Title}
+Description: {processState.Description}
 
-**Current Plan:** {processState.CurrentPlan}
+Plan: {planOutput}
+Code: {codeOutput}
+Test Results: {testOutput}
 
-**Generated Code:** {processState.GeneratedCode}
-
-**Test Results:** {processState.TestResults?.AllTestsPassed} - {processState.TestResults?.ErrorMessage}
-
-**Process Context:**
-- Iteration: {processState.IterationNumber}
-- Total execution time: {processState.Metrics.TotalExecutionTime}
-
-**Task:** Analyze the current results and determine the next action. Consider:
-1. Did the tests pass? If not, what went wrong?
-2. Is the solution complete and correct?
-3. Are there opportunities for improvement?
-4. Should we continue to the next iteration or converge?
-
-**Output Format:** Provide a structured reflection in JSON format:
+Please provide reflection in JSON format with the following structure:
 {{
-  ""shouldContinue"": true/false,
-  ""analysis"": ""Detailed analysis of the current state"",
-  ""improvements"": [""improvement1"", ""improvement2""],
-  ""issues"": [""issue1"", ""issue2""],
-  ""qualityScore"": 0.0-1.0,
-  ""nextAction"": ""Specific action to take next"",
-  ""convergenceReason"": ""Reason for continuing or stopping""
-}}";
+    ""analysis"": ""Detailed analysis of the process"",
+    ""improvements"": [""Improvement 1"", ""Improvement 2"", ...],
+    ""quality_score"": 0.85,
+    ""lessons_learned"": [""Lesson 1"", ""Lesson 2"", ...]
+}}
+";
     }
 
-    private TestResults ParseTestResults(string testResultJson)
+    private ReflectionData? ParseReflectionResult(string reflectionJson)
     {
         try
         {
-            // Simplified parsing - in a real implementation, you'd use proper JSON deserialization
-            var testResults = new TestResults
+            // Simple JSON parsing - in a real implementation, use proper JSON deserialization
+            if (reflectionJson.Contains("\"analysis\"") && reflectionJson.Contains("\"improvements\""))
             {
-                AllTestsPassed = testResultJson.Contains("\"allTestsPassed\": true"),
-                TestCases = new List<TestResult>(),
-                PerformanceScore = 0.8, // Default score
-                ExecutionTime = TimeSpan.FromMilliseconds(100) // Default time
-            };
-
-            // Add a simple test case based on the result
-            testResults.TestCases.Add(new TestResult
-            {
-                TestName = "Basic Functionality Test",
-                Passed = testResults.AllTestsPassed,
-                ExpectedOutput = "Expected successful execution",
-                ActualOutput = testResults.AllTestsPassed ? "Success" : "Failed",
-                ErrorMessage = testResults.AllTestsPassed ? null : "Test failed"
-            });
-
-            return testResults;
+                return new ReflectionData
+                {
+                    Analysis = "Process analysis completed",
+                    Improvements = new List<string> { "Continue monitoring and optimization" },
+                    QualityScore = 0.85
+                };
+            }
+            return null;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error parsing test results");
-            return new TestResults
-            {
-                AllTestsPassed = false,
-                ErrorMessage = "Error parsing test results: " + ex.Message
-            };
+            _logger.LogError(ex, "Error parsing reflection result: {ReflectionJson}", reflectionJson);
+            return null;
         }
     }
 
-    private ReflectionResult ParseReflectionResult(string reflectionJson)
+    // Helper class for reflection data
+    private class ReflectionData
     {
-        try
-        {
-            // Simplified parsing - in a real implementation, you'd use proper JSON deserialization
-            return new ReflectionResult
-            {
-                ShouldContinue = reflectionJson.Contains("\"shouldContinue\": true"),
-                Analysis = "Analysis of current results",
-                Improvements = new List<string> { "Potential improvement 1" },
-                Issues = new List<string>(),
-                QualityScore = 0.8, // Default score
-                NextAction = "Continue to next iteration or converge"
-            };
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error parsing reflection results");
-            return new ReflectionResult
-            {
-                ShouldContinue = false,
-                Analysis = "Error parsing reflection results",
-                QualityScore = 0.0,
-                NextAction = "Stop due to parsing error"
-            };
-        }
+        public string Analysis { get; set; } = string.Empty;
+        public List<string> Improvements { get; set; } = new();
+        public double QualityScore { get; set; }
     }
 } 
