@@ -1,0 +1,22 @@
+{
+  "title": "User Management API Client Generation",
+  "description": "Create a C# client for the User Management API using OpenAPI specification.",
+  "goals": [
+    "Generate type-safe C# client",
+    "Implement authentication",
+    "Add comprehensive error handling",
+    "Include unit tests"
+  ],
+  "constraints": [
+    "Must use .NET 9",
+    "Follow enterprise security standards",
+    "Include 80% code coverage"
+  ],
+  "priority": "High",
+  "timeLimit": "00:30:00",
+  "context": {
+    "openApiUrl": "https://api.example.com/swagger/v1/swagger.json",
+    "targetFramework": "net9.0",
+    "authenticationType": "Bearer"
+  }
+} 

@@ -1,0 +1,6 @@
+{
+  "sourceCode": "public class Calculator { public int Add(int a, int b) => a + b; }",
+  "functionName": "Add",
+  "parameters": [5, 3],
+  "executeAfterCompile": true
+} 
