@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\StrangeLoopPlatform.Core\StrangeLoopPlatform.Core.csproj" />
     <ProjectReference Include="..\StrangeLoopPlatform.Agents\StrangeLoopPlatform.Agents.csproj" />
+    <ProjectReference Include="..\StrangeLoopPlatform.Infrastructure\StrangeLoopPlatform.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
