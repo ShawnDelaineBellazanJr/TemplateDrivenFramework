@@ -6,6 +6,11 @@ using Microsoft.Extensions.Logging;
 using StrangeLoopPlatform.Core.Interfaces;
 using NSwag;
 using NSwag.CodeGeneration.CSharp;
+using System.Reflection;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using System.IO;
+using System.Linq;
 
 namespace StrangeLoopPlatform.Infrastructure.Services;
 
@@ -139,5 +144,168 @@ public class NSwagCodeGenerationService : INSwagCodeGenerationService
             SupportedLanguages = new List<string> { "CSharp", "TypeScript" },
             Features = new List<string> { "Client generation", "DTO generation", "Exception classes" }
         };
+    }
+
+    public async Task<Assembly> GenerateAndCompileAssemblyAsync(string openApiContent, string namespaceName, string className)
+    {
+        if (string.IsNullOrWhiteSpace(openApiContent)) throw new ArgumentNullException(nameof(openApiContent));
+        
+        try
+        {
+            _logger.LogInformation("Generating and compiling assembly from OpenAPI content for {ClassName}", className);
+
+            // 1. Generate C# code from OpenAPI content
+            var clientCode = await GenerateCSharpClientFromContentAsync(openApiContent, namespaceName, className);
+
+            // 2. Compile the generated code using Roslyn with proper references
+            var compilation = CSharpCompilation.Create(
+                assemblyName: $"{className}.dll",
+                syntaxTrees: new[] { CSharpSyntaxTree.ParseText(clientCode) },
+                references: GetRequiredReferences(),
+                options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+            );
+
+            // 3. Compile to assembly
+            using var ms = new MemoryStream();
+            var result = compilation.Emit(ms);
+
+            if (!result.Success)
+            {
+                var errors = string.Join("\n", result.Diagnostics.Select(d => d.ToString()));
+                throw new InvalidOperationException($"Compilation failed:\n{errors}");
+            }
+
+            ms.Position = 0;
+            var assembly = Assembly.Load(ms.ToArray());
+
+            _logger.LogInformation("Successfully generated and compiled assembly for {ClassName}", className);
+            return assembly;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to generate and compile assembly from OpenAPI content");
+            throw new InvalidOperationException($"NSwag assembly generation failed: {ex.Message}", ex);
+        }
+    }
+
+    public async Task<(Assembly Assembly, byte[] DllBytes)> GenerateAndCompileAssemblyWithBytesAsync(string openApiContent, string namespaceName, string className)
+    {
+        if (string.IsNullOrWhiteSpace(openApiContent)) throw new ArgumentNullException(nameof(openApiContent));
+        
+        try
+        {
+            _logger.LogInformation("Generating and compiling assembly with bytes from OpenAPI content for {ClassName}", className);
+
+            // 1. Generate C# code from OpenAPI content
+            var clientCode = await GenerateCSharpClientFromContentAsync(openApiContent, namespaceName, className);
+
+            // 2. Compile the generated code using Roslyn with proper references
+            var compilation = CSharpCompilation.Create(
+                assemblyName: $"{className}.dll",
+                syntaxTrees: new[] { CSharpSyntaxTree.ParseText(clientCode) },
+                references: GetRequiredReferences(),
+                options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+            );
+
+            // 3. Compile to assembly and get bytes
+            using var ms = new MemoryStream();
+            var result = compilation.Emit(ms);
+
+            if (!result.Success)
+            {
+                var errors = string.Join("\n", result.Diagnostics.Select(d => d.ToString()));
+                throw new InvalidOperationException($"Compilation failed:\n{errors}");
+            }
+
+            var dllBytes = ms.ToArray();
+            ms.Position = 0;
+            var assembly = Assembly.Load(dllBytes);
+
+            _logger.LogInformation("Successfully generated and compiled assembly with bytes for {ClassName}", className);
+            return (assembly, dllBytes);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to generate and compile assembly with bytes from OpenAPI content");
+            throw new InvalidOperationException($"NSwag assembly generation failed: {ex.Message}", ex);
+        }
+    }
+
+    private static IEnumerable<MetadataReference> GetRequiredReferences()
+    {
+        var references = new List<MetadataReference>();
+
+        // Core runtime assemblies
+        references.Add(MetadataReference.CreateFromFile(typeof(object).Assembly.Location));
+        references.Add(MetadataReference.CreateFromFile(typeof(System.Runtime.CompilerServices.AsyncMethodBuilderAttribute).Assembly.Location));
+        references.Add(MetadataReference.CreateFromFile(typeof(System.Collections.Generic.List<>).Assembly.Location));
+        references.Add(MetadataReference.CreateFromFile(typeof(System.Threading.Tasks.Task).Assembly.Location));
+        references.Add(MetadataReference.CreateFromFile(typeof(System.Uri).Assembly.Location));
+        references.Add(MetadataReference.CreateFromFile(typeof(System.Exception).Assembly.Location));
+        references.Add(MetadataReference.CreateFromFile(typeof(System.Attribute).Assembly.Location));
+        references.Add(MetadataReference.CreateFromFile(typeof(System.Text.Encoding).Assembly.Location));
+        references.Add(MetadataReference.CreateFromFile(typeof(HttpClient).Assembly.Location));
+        references.Add(MetadataReference.CreateFromFile(typeof(System.Net.Http.HttpRequestMessage).Assembly.Location));
+        references.Add(MetadataReference.CreateFromFile(typeof(System.Net.HttpStatusCode).Assembly.Location));
+        references.Add(MetadataReference.CreateFromFile(typeof(System.Text.Json.JsonSerializer).Assembly.Location));
+
+        // Dynamically resolve and add System.Runtime.dll and other core assemblies
+        var runtimeDir = System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory();
+        string[] coreAssemblies = new[]
+        {
+            "System.Runtime.dll",
+            "System.Private.CoreLib.dll",
+            "System.Console.dll",
+            "System.Linq.dll",
+            "System.Linq.Expressions.dll",
+            "System.Private.Uri.dll",
+            "System.Net.Primitives.dll",
+            "System.Private.Xml.dll",
+            "System.Private.Xml.Linq.dll",
+            "System.ComponentModel.Primitives.dll",
+            "System.ComponentModel.TypeConverter.dll",
+            "System.ObjectModel.dll",
+            "System.IO.dll",
+            "System.IO.FileSystem.dll",
+            "System.Reflection.dll",
+            "System.Reflection.Extensions.dll",
+            "System.Reflection.Primitives.dll",
+            "System.Threading.dll",
+            "System.Threading.Tasks.dll"
+        };
+        foreach (var asm in coreAssemblies)
+        {
+            var path = Path.Combine(runtimeDir, asm);
+            if (File.Exists(path))
+            {
+                references.Add(MetadataReference.CreateFromFile(path));
+            }
+        }
+
+        // Add Newtonsoft.Json if available
+        try
+        {
+            var newtonsoftAssembly = typeof(Newtonsoft.Json.JsonConvert).Assembly;
+            references.Add(MetadataReference.CreateFromFile(newtonsoftAssembly.Location));
+        }
+        catch { }
+
+        // Add System.Runtime.Serialization if available
+        try
+        {
+            var serializationAssembly = typeof(System.Runtime.Serialization.EnumMemberAttribute).Assembly;
+            references.Add(MetadataReference.CreateFromFile(serializationAssembly.Location));
+        }
+        catch { }
+
+        // Add System.IO if available
+        try
+        {
+            var ioAssembly = typeof(System.IO.TextReader).Assembly;
+            references.Add(MetadataReference.CreateFromFile(ioAssembly.Location));
+        }
+        catch { }
+
+        return references;
     }
 } 

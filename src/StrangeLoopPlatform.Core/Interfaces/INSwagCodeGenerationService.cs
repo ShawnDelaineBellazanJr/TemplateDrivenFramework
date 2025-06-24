@@ -1,4 +1,5 @@
 using Microsoft.SemanticKernel;
+using System.Reflection;
 
 namespace StrangeLoopPlatform.Core.Interfaces;
 
@@ -102,6 +103,30 @@ public interface INSwagCodeGenerationService
     /// </summary>
     /// <returns>NSwag version information and supported features</returns>
     Task<NSwagVersionInfo> GetVersionInfoAsync();
+
+    /// <summary>
+    /// Generates and compiles an assembly directly from OpenAPI specification content.
+    /// This method uses NSwag's built-in compilation capabilities to create a ready-to-use assembly.
+    /// </summary>
+    /// <param name="openApiContent">Raw OpenAPI specification content (JSON or YAML)</param>
+    /// <param name="namespaceName">Namespace for the generated code</param>
+    /// <param name="className">Name for the generated client class</param>
+    /// <returns>Compiled assembly that can be loaded and used</returns>
+    /// <exception cref="ArgumentNullException">Thrown when openApiContent is null or empty</exception>
+    /// <exception cref="InvalidOperationException">Thrown when compilation fails</exception>
+    Task<Assembly> GenerateAndCompileAssemblyAsync(string openApiContent, string namespaceName, string className);
+
+    /// <summary>
+    /// Generates and compiles an assembly directly from OpenAPI specification content, returning the compiled bytes.
+    /// This method uses NSwag's built-in compilation capabilities to create a ready-to-use assembly and returns the bytes for saving to a DLL file.
+    /// </summary>
+    /// <param name="openApiContent">Raw OpenAPI specification content (JSON or YAML)</param>
+    /// <param name="namespaceName">Namespace for the generated code</param>
+    /// <param name="className">Name for the generated client class</param>
+    /// <returns>Tuple containing the compiled assembly and the DLL bytes</returns>
+    /// <exception cref="ArgumentNullException">Thrown when openApiContent is null or empty</exception>
+    /// <exception cref="InvalidOperationException">Thrown when compilation fails</exception>
+    Task<(Assembly Assembly, byte[] DllBytes)> GenerateAndCompileAssemblyWithBytesAsync(string openApiContent, string namespaceName, string className);
 }
 
 /// <summary>

@@ -4,6 +4,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <NoWarn>$(NoWarn);SKEXP0080</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,6 +13,8 @@
     <PackageReference Include="Microsoft.SemanticKernel" Version="1.57.0" />
     <PackageReference Include="Microsoft.SemanticKernel.Agents.Core" Version="1.57.0" />
     <PackageReference Include="Microsoft.SemanticKernel.Agents.OpenAI" Version="1.57.0-preview" />
+    <PackageReference Include="Microsoft.SemanticKernel.Process.Core" Version="1.57.0-alpha" />
+    <PackageReference Include="Microsoft.SemanticKernel.Process.LocalRuntime" Version="1.57.0-alpha" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.1" />
   </ItemGroup>
 
